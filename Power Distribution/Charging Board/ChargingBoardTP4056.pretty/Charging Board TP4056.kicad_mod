@@ -1,0 +1,194 @@
+(footprint "Charging Board TP4056"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(property "Reference" "REF**"
+		(at 1 2 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "0b4717a5-a50b-4eb4-ba44-66ab635fb33b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+		)
+	)
+	(property "Value" "Charging Board"
+		(at 1 3.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "8c1572cb-050c-4718-a738-f4ff7514d216")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 1 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "d17f4e5b-09c6-4177-9ce5-655862faf988")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 1 2.5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "53af5944-6ca9-42f5-a38f-8b979804e075")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -11 -5.5)
+		(end 12.5 -5.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "86543cac-8e40-4335-b7e6-50a058b2f9e8")
+	)
+	(fp_line
+		(start -11 12.5)
+		(end -11 -5.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "2267f581-ebc9-4618-9513-85cedf72152c")
+	)
+	(fp_line
+		(start 12.5 -5.5)
+		(end 12.5 12.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "e9c5ad01-abfe-4b05-a7fa-6f395cfbbf91")
+	)
+	(fp_line
+		(start 12.5 12.5)
+		(end -11 12.5)
+		(stroke
+			(width 0.1)
+			(type default)
+		)
+		(layer "F.SilkS")
+		(uuid "2d5b71cd-c45d-406a-b0ae-c57f2fd87829")
+	)
+	(fp_text user "-"
+		(at -1 -2 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "754447ee-10e5-4b02-b9f3-1f9d9e788416")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify bottom)
+		)
+	)
+	(fp_text user "+"
+		(at -9.5 -2 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "90e7b576-e538-42ec-9bad-708028db3ce2")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify bottom)
+		)
+	)
+	(fp_text user "B-"
+		(at 11 -1.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "af0322d9-fc49-40d7-ab3c-1dd961c1b68b")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify bottom)
+		)
+	)
+	(fp_text user "B+"
+		(at 2.3 -1.5 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "dae23762-f8eb-47c8-86ba-77b19657ea09")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.1)
+			)
+			(justify bottom)
+		)
+	)
+	(fp_text user "REF**"
+		(at 1 5 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(uuid "3065266e-618d-49a6-b3c6-60efe658498f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.125)
+			)
+		)
+	)
+	(pad "1" thru_hole circle
+		(at -9.5 -4)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "ac52d200-af03-46e1-b4a8-531c378abbe9")
+	)
+	(pad "2" thru_hole circle
+		(at -1 -4)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "7f560328-9ac9-45e7-b778-40c8a45aed91")
+	)
+	(pad "3" thru_hole circle
+		(at 2.3 -4)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "40d652e1-a3b6-4d73-b263-cb078144cf9e")
+	)
+	(pad "4" thru_hole circle
+		(at 11 -4)
+		(size 2 2)
+		(drill 1)
+		(layers "*.Cu" "*.Mask")
+		(remove_unused_layers no)
+		(uuid "02d7370e-c766-401f-bb22-5b206fe94fc6")
+	)
+	(embedded_fonts no)
+)

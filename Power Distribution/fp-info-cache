@@ -1,4 +1,4 @@
-24739089156048168
+24737347773738538
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)
@@ -64644,13 +64644,6 @@ solder jumper open
 0
 3
 3
-LD1117V33
-TO255P1020X450X1968-3
-
-
-0
-3
-3
 LED_SMD
 LED-APA102-2020
 http://www.led-color.com/upload/201604/APA102-2020%20SMD%20LED.pdf
@@ -65855,6 +65848,13 @@ Yellow 5381 Series LED
 0
 2
 2
+Library
+Charging Board TP4056
+
+
+0
+4
+4
 Module
 A20_OLINUXINO_LIME2
 A20 Olinuxino LIME2, 1.2GHz, 512-1024MB RAM, Micro-SD, NAND or eMMC, 1000Mbit Ethernet
@@ -99518,10 +99518,3 @@ Varistor VF
 0
 2
 2
-XL6009
-XL6009
-
-
-0
-6
-6
