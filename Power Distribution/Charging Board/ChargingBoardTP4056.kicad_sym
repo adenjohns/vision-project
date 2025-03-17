@@ -27,13 +27,12 @@
 				(justify right)
 			)
 		)
-		(property "Footprint" ""
+		(property "Footprint" "ChargingBoardTP4056:Charging Board TP4056"
 			(at 3.81 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
 				)
-				(hide yes)
 			)
 		)
 		(property "Datasheet" "https://www.usb.org/sites/default/files/documents/usb_type-c.zip"
@@ -120,17 +119,6 @@
 			)
 		)
 		(symbol "ChargingBoardTP4056_0_1"
-			(rectangle
-				(start -10.16 17.78)
-				(end 10.16 -17.78)
-				(stroke
-					(width 0.254)
-					(type default)
-				)
-				(fill
-					(type background)
-				)
-			)
 			(polyline
 				(pts
 					(xy -8.89 -3.81) (xy -8.89 3.81)
@@ -240,6 +228,17 @@
 			)
 		)
 		(symbol "ChargingBoardTP4056_1_1"
+			(rectangle
+				(start -10.16 17.78)
+				(end 10.16 -17.78)
+				(stroke
+					(width 0.254)
+					(type solid)
+				)
+				(fill
+					(type background)
+				)
+			)
 			(pin output line
 				(at 15.24 12.7 180)
 				(length 5.08)
@@ -354,7 +353,7 @@
 			(pin output line
 				(at 15.24 -8.89 180)
 				(length 5.08)
-				(name "B+"
+				(name "B-"
 					(effects
 						(font
 							(size 1.27 1.27)
