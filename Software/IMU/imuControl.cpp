@@ -132,7 +132,7 @@ int main() {
         previousGyro = gyroData;
         
         // Display orientation data (euler)
-        std::cout << "Orientation: ";
+        std::cout << "    Orientation: ";
         std::cout << "X=" << std::fixed << std::setprecision(2) << euler.x() << "° ";
         std::cout << "Y=" << std::fixed << std::setprecision(2) << euler.y() << "° ";
         std::cout << "Z=" << std::fixed << std::setprecision(2) << euler.z() << "°";
