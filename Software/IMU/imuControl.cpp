@@ -11,7 +11,7 @@
 // Flag to control program execution
 volatile bool running = true;
 
-// Function to check if two values differ by at least threshold
+// Function to check if two values differ by at least threshold (will use this for termination)
 bool hasChangedBy(float current, float previous, float threshold) {
     return std::abs(current - previous) >= threshold;
 }
@@ -28,10 +28,10 @@ int main() {
 
     std::cout << "BNO055 Sensor Test using pigpio\n";
     
-    // Add this at the beginning of main() after signal handler
+
     gpioInitialise();  // Initialize pigpio early
 
-    // Also add a check for the i2c handle
+// This whole section is just to check if the i2c is working (and device is on correct bus)
     int handle = i2cOpen(3, 0x28, 0);
     if (handle < 0) {
         std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
@@ -41,9 +41,9 @@ int main() {
     }
     
     // Create sensor instance with bus 1 and address 0x28
-    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 1);  // Try using bus 1 instead
+    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 1);  // Try using bus 1 instead (should be the case)
     
-    // Initialize the sensor (without mode parameter)
+    // Initialize the sensor 
     if (!bno.begin()) {
         std::cerr << "Failed to initialize BNO055 sensor!\n";
         return -1;
@@ -72,8 +72,8 @@ int main() {
     imu::Vector<3> previousGyro;
     bool firstReading = true;
     std::chrono::steady_clock::time_point lastMotionTime;
-    const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold
-    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout
+    const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
+    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
     
     // Main loop
     while (running) {
@@ -128,23 +128,23 @@ int main() {
             lastMotionTime = std::chrono::steady_clock::now();
         }
         
-        // Save current values for next comparison
+        // Save values for next comparison
         previousGyro = gyroData;
         
-        // Display orientation data
+        // Display orientation data (euler)
         std::cout << "Orientation: ";
         std::cout << "X=" << std::fixed << std::setprecision(2) << euler.x() << "° ";
         std::cout << "Y=" << std::fixed << std::setprecision(2) << euler.y() << "° ";
         std::cout << "Z=" << std::fixed << std::setprecision(2) << euler.z() << "°";
         
-        // Get temperature
+        // Get temp (idk if we need this but just in case)
         int8_t temp = bno.getTemp();
         std::cout << " | Temp=" << (int)temp << "°C";
         
         std::cout << std::flush; // Ensure output is displayed
         
         // Wait a bit - using gpioDelay for more precise timing
-        gpioDelay(100000); // 100ms
+        gpioDelay(100000); // 100ms (can be changed depending on desired sampling rate)
     }
     
     std::cout << "\nExiting...\n";
