@@ -1,6 +1,125 @@
-24742573829332158
-2472
-MODULE_2472
+24773940749980296
+1k
+RES_ERJ2RKF1001X
+
+
+0
+2
+2
+47k
+RES_ERA6ARW473V
+
+
+0
+2
+2
+47nf
+CAP_PAN_EEE_K16_PAN
+
+EEV-TG1A472M 
+0
+2
+2
+47nf
+CAP_PAN_EEE_K16_PAN-L
+
+EEV-TG1A472M 
+0
+2
+2
+47nf
+CAP_PAN_EEE_K16_PAN-M
+
+EEV-TG1A472M 
+0
+2
+2
+47uF
+CAPC3225X280N
+
+
+0
+2
+2
+68uF
+CAP_TAJ-D- 2917-S_AVX
+
+TAJD687K006TNJV 
+0
+2
+2
+68uF
+CAP_TAJ-D- 2917-S_AVX-L
+
+TAJD687K006TNJV 
+0
+2
+2
+68uF
+CAP_TAJ-D- 2917-S_AVX-M
+
+TAJD687K006TNJV 
+0
+2
+2
+Adafruit 128x32 Pi OLED
+0805-NO
+
+
+0
+2
+2
+Adafruit 128x32 Pi OLED
+ADAFRUIT_2.5MM
+
+
+0
+0
+0
+Adafruit 128x32 Pi OLED
+ADAFRUIT_TEXT_20MM
+
+
+0
+0
+0
+Adafruit 128x32 Pi OLED
+FIDUCIAL_1MM
+
+
+0
+1
+1
+Adafruit 128x32 Pi OLED
+MOUNTINGHOLE_3.0_PLATEDTHIN
+
+
+0
+1
+1
+Adafruit 128x32 Pi OLED
+PCBFEAT-REV-040
+Revision Level Field - 40 mil{return}{return}Set version with global board attribute '>REV'
+
+0
+0
+0
+Adafruit 128x32 Pi OLED
+RASPBERRYPI_2X3_THMSMT
+
+
+0
+12
+12
+Adafruit 128x32 Pi OLED
+SOT23
+SOT-23
+
+0
+3
+3
+Adafruit 128x32 Pi OLED
+UG-2832HSWEG02_WRAPUNDER
 
 
 0
@@ -68613,6 +68732,13 @@ net tie
 0
 4
 4
+OLED
+MODULE_DM-OLED096-636
+
+
+0
+8
+8
 OptoDevice
 ADNS-9800
 Laser Gaming Sensor ADNS-9800
@@ -88920,6 +89046,13 @@ WiFi IEEE802.11 b/g/n
 0
 44
 44
+Raspberry Pi Zero 2 w
+MODULE_SC1176
+
+
+0
+40
+40
 Relay_SMD
 Relay_2P2T_10x6mm_TE_IMxxG
 Signal Relay, 10x6mm, 2 Form C, Gull Wings, https://www.te.com/commerce/DocumentDelivery/DDEController?Action=showdoc&DocId=Data+Sheet%7F108-98001%7FZ.1%7Fpdf%7FEnglish%7FENG_DS_108-98001_Z.1.pdf
@@ -91209,13 +91342,6 @@ rotary encoder illuminated switch vertical
 0
 9
 8
-SC1176
-MODULE_SC1176
-
-
-0
-40
-40
 Sensor
 ASAIR_AM2302_P2.54mm_Lead2.75mm_TabDown
 Temperature and humidity module, http://akizukidenshi.com/download/ds/aosong/AM2302.pdf

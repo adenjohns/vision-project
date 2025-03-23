@@ -450,7 +450,7 @@
     "pinned_symbol_libs": []
   },
   "meta": {
-    "filename": "Power Distribution.kicad_pro",
+    "filename": "Adafruit 128x32 Pi OLED.kicad_pro",
     "version": 3
   },
   "net_settings": {
@@ -489,7 +489,7 @@
       "plot": "",
       "pos_files": "",
       "specctra_dsn": "",
-      "step": "Power Distribution.step",
+      "step": "Adafruit 128x32 Pi OLED.glb",
       "svg": "",
       "vrml": ""
     },
@@ -596,7 +596,7 @@
       "version": 1
     },
     "net_format_name": "",
-    "page_layout_descr_file": "",
+    "page_layout_descr_file": "empty.kicad_wks",
     "plot_directory": "",
     "space_save_all_events": true,
     "spice_current_sheet_as_root": false,
@@ -610,7 +610,7 @@
   },
   "sheets": [
     [
-      "ec1b8d42-e234-41e0-8bcf-2b2f52e7d9b3",
+      "8f776766-d194-45ad-84e7-a2cd816d2156",
       "Root"
     ]
   ],
