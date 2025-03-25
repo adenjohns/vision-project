@@ -1,4 +1,4 @@
-24773940749980296
+24779168455510618
 1k
 RES_ERJ2RKF1001X
 
@@ -6593,6 +6593,13 @@ Charging Board TP4056
 0
 4
 4
+ChargingBoardTP4056
+Untitled
+
+
+0
+0
+0
 Connector
 Banana_Cliff_FCR7350B_S16N-PC_Horizontal
 Cliff single 4mm shrouded banana panel socket, through-hole, horizontal, black, https://www.cliffuk.co.uk/products/testleads/sockets/S16NPC.pdf
@@ -58568,6 +58575,13 @@ heatsink
 0
 0
 0
+IMU
+MODULE_2472
+
+
+0
+14
+14
 Inductor_SMD
 L_6.3x6.3_H3
 Choke, SMD, 6.3x6.3mm 3mm height
@@ -69936,6 +69950,13 @@ DIL DIP PDIP 2.54mm 7.62mm 300mil
 0
 4
 4
+PCM5102
+PCM5102
+
+
+0
+15
+15
 Package_BGA
 Alliance_TFBGA-36_6x8mm_Layout6x8_P0.75mm
 Alliance TFBGA-36, NSMD, 6.0x8.0mm, 36 Ball, 6x8 Layout, 0.75mm Pitch, https://www.alliancememory.com/wp-content/uploads/pdf/AS6C1008_Mar_2023V1.2.pdf
