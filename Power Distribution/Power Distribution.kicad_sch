@@ -1140,6 +1140,133 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Device:Speaker"
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "LS"
+				(at 1.27 5.715 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Value" "Speaker"
+				(at 1.27 3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify right)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 -5.08 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at -0.254 -1.27 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Speaker"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "speaker sound"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "Speaker_0_0"
+				(rectangle
+					(start -2.54 1.27)
+					(end 1.016 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.016 1.27) (xy 3.556 3.81) (xy 3.556 -6.35) (xy 1.016 -3.81)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Speaker_1_1"
+				(pin input line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -5.08 -2.54 0)
+					(length 2.54)
+					(name "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "ERA6ARW473V:ERA6ARW473V"
 			(pin_names
 				(offset 1.016)
@@ -3362,20 +3489,12 @@
 		(uuid "4103c21d-d91c-4406-bf7d-9f0c193722eb")
 	)
 	(no_connect
-		(at 254 44.45)
-		(uuid "454ac96a-b9a0-4e86-904a-4d116e5295ce")
-	)
-	(no_connect
 		(at 149.86 80.01)
 		(uuid "4c2e9136-f7e3-49ec-943e-2156529abd0b")
 	)
 	(no_connect
 		(at 233.68 44.45)
 		(uuid "52a55daa-f011-4cc6-afcf-24df3582255b")
-	)
-	(no_connect
-		(at 243.84 44.45)
-		(uuid "5360bc7a-899b-4ab2-b0d4-25f10549af76")
 	)
 	(no_connect
 		(at 238.76 44.45)
@@ -3424,10 +3543,6 @@
 	(no_connect
 		(at 210.82 49.53)
 		(uuid "8a81463b-000b-487b-9b12-2b83d97631de")
-	)
-	(no_connect
-		(at 246.38 44.45)
-		(uuid "8add1db4-cf32-4d9b-9d66-2f8024727882")
 	)
 	(no_connect
 		(at 222.25 58.42)
@@ -3482,16 +3597,8 @@
 		(uuid "e67dba5e-a50e-441b-bb23-60a8d7721c4f")
 	)
 	(no_connect
-		(at 251.46 44.45)
-		(uuid "e94de387-cb19-4e36-b38c-c96cb2ff1dfc")
-	)
-	(no_connect
 		(at 149.86 69.85)
 		(uuid "f00ace12-50d0-4cb5-bb5b-91af3563fcc2")
-	)
-	(no_connect
-		(at 248.92 44.45)
-		(uuid "f1454615-fd4a-4948-9d44-e5da82a6fa12")
 	)
 	(wire
 		(pts
@@ -3635,6 +3742,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 44.45) (xy 251.46 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "48a45a90-df9c-42c4-b8d7-1a7851e3f110")
+	)
+	(wire
+		(pts
 			(xy 220.98 63.5) (xy 222.25 63.5)
 		)
 		(stroke
@@ -3655,6 +3772,16 @@
 	)
 	(wire
 		(pts
+			(xy 246.38 44.45) (xy 246.38 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "56b5d295-f8a7-402a-a37d-0e3f01cfb293")
+	)
+	(wire
+		(pts
 			(xy 214.63 64.77) (xy 214.63 31.75)
 		)
 		(stroke
@@ -3662,6 +3789,16 @@
 			(type default)
 		)
 		(uuid "5ef31cdc-26e4-417d-b67f-9b8b08ee53bd")
+	)
+	(wire
+		(pts
+			(xy 231.14 46.99) (xy 243.84 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5f0c795d-adcb-457e-ab7f-dd0ba53ddc26")
 	)
 	(wire
 		(pts
@@ -3735,6 +3872,16 @@
 	)
 	(wire
 		(pts
+			(xy 251.46 48.26) (xy 261.62 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "76afe55c-f936-4454-91e3-d588b781c9ea")
+	)
+	(wire
+		(pts
 			(xy 149.86 111.76) (xy 218.44 111.76)
 		)
 		(stroke
@@ -3745,6 +3892,26 @@
 	)
 	(wire
 		(pts
+			(xy 246.38 50.8) (xy 260.35 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "78953edb-5200-4ae9-b8ba-a03832f13171")
+	)
+	(wire
+		(pts
+			(xy 261.62 49.53) (xy 261.62 57.15)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "7ee9ebcc-614f-4b83-8250-7c6de3703632")
+	)
+	(wire
+		(pts
 			(xy 143.51 115.57) (xy 220.98 115.57)
 		)
 		(stroke
@@ -3752,6 +3919,16 @@
 			(type default)
 		)
 		(uuid "81125a1a-4cdf-4156-8504-1a51cb33bb28")
+	)
+	(wire
+		(pts
+			(xy 254 44.45) (xy 261.62 44.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "8aa09672-7d1b-4100-8624-bb7546febe55")
 	)
 	(wire
 		(pts
@@ -3775,6 +3952,16 @@
 	)
 	(wire
 		(pts
+			(xy 260.35 50.8) (xy 260.35 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "98c7a3e0-8736-401d-b45a-22cdfd9ae602")
+	)
+	(wire
+		(pts
 			(xy 219.71 43.18) (xy 219.71 26.67)
 		)
 		(stroke
@@ -3782,6 +3969,16 @@
 			(type default)
 		)
 		(uuid "991c6651-0927-4a02-8442-a0629c860437")
+	)
+	(wire
+		(pts
+			(xy 248.92 49.53) (xy 261.62 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9d27a1b7-fa25-44f5-8971-44bef311d9cf")
 	)
 	(wire
 		(pts
@@ -3825,6 +4022,16 @@
 	)
 	(wire
 		(pts
+			(xy 231.14 41.91) (xy 231.14 46.99)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "aa206015-757d-459c-9bab-356153335bc3")
+	)
+	(wire
+		(pts
 			(xy 111.76 40.64) (xy 111.76 52.07)
 		)
 		(stroke
@@ -3832,6 +4039,16 @@
 			(type default)
 		)
 		(uuid "aac759f8-6173-4dfa-8c31-c764976fee19")
+	)
+	(wire
+		(pts
+			(xy 248.92 44.45) (xy 248.92 49.53)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "acfb5269-68d7-4e35-8b0a-8241bd8ccf3a")
 	)
 	(wire
 		(pts
@@ -3875,6 +4092,26 @@
 	)
 	(wire
 		(pts
+			(xy 261.62 44.45) (xy 261.62 45.72)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "baa897c0-a9c3-4fc1-b074-abe8a85b8e48")
+	)
+	(wire
+		(pts
+			(xy 260.35 59.69) (xy 261.62 59.69)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c169e32f-6bf4-4c5b-81dd-e8eb6a556cf0")
+	)
+	(wire
+		(pts
 			(xy 210.82 59.69) (xy 213.36 59.69)
 		)
 		(stroke
@@ -3892,6 +4129,16 @@
 			(type default)
 		)
 		(uuid "c8fa9168-9309-42b5-804d-1c37c3670885")
+	)
+	(wire
+		(pts
+			(xy 243.84 46.99) (xy 243.84 44.45)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d08f42aa-dece-4002-91bd-93b926d5aead")
 	)
 	(wire
 		(pts
@@ -3922,6 +4169,16 @@
 			(type default)
 		)
 		(uuid "daf30f12-431c-4bce-9356-6094796f4e2e")
+	)
+	(wire
+		(pts
+			(xy 218.44 41.91) (xy 231.14 41.91)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "db6dc1af-c832-4d1c-bf51-4cd92e794c83")
 	)
 	(wire
 		(pts
@@ -4453,6 +4710,76 @@
 		)
 	)
 	(symbol
+		(lib_id "Device:Speaker")
+		(at 266.7 57.15 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "4a031eea-234b-4fee-a8b3-0e2d9bbcf503")
+		(property "Reference" "LS2"
+			(at 271.78 57.1499 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Speaker"
+			(at 271.78 59.6899 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 62.23 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 266.446 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Speaker"
+			(at 266.7 57.15 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a27f5f22-529f-44e9-ae09-82b67af100e2")
+		)
+		(pin "2"
+			(uuid "8989bd88-4f0d-4174-8bb4-8ad2bd8f7fde")
+		)
+		(instances
+			(project ""
+				(path "/ec1b8d42-e234-41e0-8bcf-2b2f52e7d9b3"
+					(reference "LS2")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "SC1176:SC1176")
 		(at 180.34 72.39 0)
 		(unit 1)
@@ -4945,6 +5272,76 @@
 			(project ""
 				(path "/ec1b8d42-e234-41e0-8bcf-2b2f52e7d9b3"
 					(reference "U5")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:Speaker")
+		(at 266.7 45.72 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "58fedd16-f976-478f-b462-de2b81bc58b3")
+		(property "Reference" "LS1"
+			(at 271.78 45.7199 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "Speaker"
+			(at 271.78 48.2599 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" ""
+			(at 266.7 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 266.446 46.99 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Speaker"
+			(at 266.7 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a27f5f22-529f-44e9-ae09-82b67af100e2")
+		)
+		(pin "2"
+			(uuid "8989bd88-4f0d-4174-8bb4-8ad2bd8f7fde")
+		)
+		(instances
+			(project ""
+				(path "/ec1b8d42-e234-41e0-8bcf-2b2f52e7d9b3"
+					(reference "LS1")
 					(unit 1)
 				)
 			)
