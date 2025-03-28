@@ -1,6 +1,11 @@
 import cv2
+import csv
 import numpy as np
 import ArducamDepthCamera as ac
+import matplotlib.pyplot as plt
+
+# MAX_DISTANCE value modifiable  is 2000 or 4000
+MAX_DISTANCE=4000
 
 
 class UserRect:
@@ -28,7 +33,7 @@ class UserRect:
         return self.start_x == self.end_x and self.start_y == self.end_y
 
 
-confidence_value = 50
+confidence_value = 30
 selectRect, followRect = UserRect(), UserRect()
 
 
@@ -66,6 +71,93 @@ def usage(argv0):
     print("Available options are:")
     print(" -d        Choose the video to use")
 
+def find_largest_gap(data_indices): # In the future find the 2-3 largest gaps if they exist
+    """
+    find_largest_gap(): Finds the largest traversable gap by counting the largest number of consecutive 
+    numbers (indices) as well as their starting and ending indeces. The gaps in data_indices occurs from 
+    reset_closest_points() which sets the points greater than the threshold to 0, and returns the indices 
+    of the rest of the non-zero values in the array. 
+
+    :param data_indices: a 1D array of numbers that are the indices of all the furthest data points for 
+        the find the gap algorithm. 
+
+    :return: max_length, max_start_idx, and max_end_idx. 
+        The max length is the length of the widest gap that exists. 
+        The max_start_idx is the starting index of the largest gap. 
+        The max_end_idx isthe ending index of the largest gap. 
+    """ 
+    max_length = 1
+    current_length = 1
+
+    start_idx = 0
+    max_start_idx = 0
+    max_end_idx = 0
+
+    for i in range(1, len(data_indices)):
+        if data_indices[i] - data_indices[i - 1] == 1:  # Checking for increasing order
+            current_length += 1
+        else:
+            if current_length > max_length: # if current len is greater than max len
+                max_length = current_length # set max len to current len
+                max_start_idx = start_idx 
+                max_end_idx = i - 1
+
+            current_length = 1  # Reset count
+            start_idx = i # Update start index 
+
+    if current_length > max_length: # Final check of the last value 
+        max_length = current_length 
+        max_start_idx = start_idx 
+        max_end_idx = len(data_indices) - 1
+    
+    return max_length, max_start_idx, max_end_idx
+
+
+def reset_closest_points(data, threshold):
+    """
+    reset_closest_points(): sets data great than threshold to zero and returns the indices of all 
+    data points larger than zero .
+
+    :param data: the 1D array that needs to be parsed.
+    :param threshold: an experimental value that is the limit to how close an object should be distance wise 
+
+    :return: the indices of all the data points larger than zero. 
+    """ 
+    
+    data[data > threshold] = 0 # set data greater than threshold to zero 
+    data_indices = np.flatnonzero(data) # find the indices of all the non zero data points in the flattened version of data
+    return data_indices # returns the indices of all the data points larger than zero 
+
+
+def min_data_rows(array, row_start, row_end): 
+    """
+    min_data_rows(): takes a 2D array and first slices it based on the necessary rows needed given by 
+    row_start and row_end, and then finds the min value of all the columns for n rows between the 
+    given starting and ending rows.
+
+    :param array: the 2D array of distance data. 
+    :param row_start: an experimental value of the beginning of the rows that need to be parsed. 
+    :param row_end: an experimental value of the end of the rows that need to be parsed.
+
+    :return: a 1D array of the min distance out of each col between row_start and row_end.
+    """ 
+
+    # so this function actually returns the MAX values in the column instead of the MIN, but that is because 
+    # the distances far away (according to result_image2.png, the green values are further away than the red values,
+    # however within the data2.csv file they are actually closer, green values: 2000s range, red values: 3000s range)
+    # appear to be smaller than the vlues close by for some reason and I will need to experimentally validate 
+    # why that is the case
+    
+    sliced_arr = array[row_start:row_end]
+    col_max_val = np.max(sliced_arr, axis=0)  # axis=0 operates along columns
+    return col_max_val
+
+
+def move_forward(max_start_idx, max_end_idx):
+    # depending on imu data, emit a sound 
+    # dividing the frame into 4 quadrants. if the gaps are between any of the quadrants, relay to the speaker 
+    x = 0
+
 
 def main():
     print("Arducam Depth Camera Demo.")
@@ -92,6 +184,8 @@ def main():
         print("Failed to start camera. Error code:", ret)
         cam.close()
         return
+
+    cam.setControl(ac.Control.RANGE, MAX_DISTANCE)
 
     r = cam.getControl(ac.Control.RANGE)
 
@@ -129,12 +223,36 @@ def main():
             cv2.imshow("preview", result_image)
             cam.releaseFrame(frame)
 
-            left_frames = depth_buf[:, :info.width // 2]
-            right_frames = depth_buf[:, info.width // 2 :]
-            if np.mean(left_frames) < 1000:
-                print("left collision")
-            if np.mean(right_frames) < 1000:
-                print("right collision")
+            ###########################################################################
+
+            depth_array = np.array(depth_buf)
+            # mean_val = np.mean(depth_array)
+            # max_value = np.max(depth_array)
+            # min_value = np.min(depth_array)
+            # print(f"\nDepth Array: \n{depth_array}\n Max Value: {max_value}\n Min Value: {min_value}\n Mean Value: {mean_val}\n")
+            # print(f"Num Rows: {depth_array.shape[0]}\n") # number of rows
+            # print(f"Num Cols: {depth_array.shape[1]}\n") # number of cols
+
+            threshold = 2999 # EXPERIMENTAL VALUE, will need to check with multiple iterations 
+            n = 84 # average width of gap or free walking path
+            row_start = 60 # EXPERIMANTAL VALUE
+            row_end = 120 # EXPERIMENTAL VALUE
+            
+            sliced_data = min_data_rows(depth_array, row_start, row_end)
+            data_indices = reset_closest_points(sliced_data, threshold)
+            # test_arr = [1, 2, 3, 10, 11, 12, 5, 6, 7, 8, 20, 21, 22, 23, 2, 3, 4, 30, 31, 32, 33, 34, 1, 2]
+            len, start_idx, end_idx = find_largest_gap(data_indices)
+            print(f"\n Largest Gap: {len}   Start Index: {start_idx}     End Index: {end_idx}\n")
+
+
+            # left_frames = depth_buf[:, :info.width // 2]
+            # right_frames = depth_buf[:, info.width // 2 :]
+            # if np.mean(left_frames) < 1000:
+            #     print("left collision")
+            # if np.mean(right_frames) < 1000:
+            #     print("right collision")
+
+            ############################################################################
 
         key = cv2.waitKey(1)
         if key == ord("q"):
