@@ -73,7 +73,7 @@ int main() {
     bool firstReading = true;
     std::chrono::steady_clock::time_point lastMotionTime;
     const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
-    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
+    const int SHUTDOWN_TIMEOUT = 60;      // 30 seconds timeout (both of these can be changed depending on needs)
     
     // Main loop
     while (running) {
