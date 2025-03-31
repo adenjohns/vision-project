@@ -35,6 +35,16 @@ IF CODE DOESN'T WORK:
    sudo systemctl enable pigpiod
    ```
 
+   Make sure only one instance of pigpio daemon is running:
+   ```
+   ps aux | grep pigpio
+   ```
+
+   If you find more than one running instance, stop it with:
+   ```
+   sudo killall pigpiod
+   ```
+
 5. Verify the IMU is detected by the Pi:
    ```
    i2cdetect -y -r 1
