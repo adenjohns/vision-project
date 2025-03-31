@@ -196,7 +196,7 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd dataIndices)
     }
 
     // Resize output vector to match the actual number of nonzero elements
-    return dataIndices.head(count);
+    dataIndices.head(count);
 }
 
 /**
@@ -273,7 +273,7 @@ int main()
             continue;
         }
         frame->getFormat(FrameType::DEPTH_FRAME, format);
-        std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
+        // std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
         max_height = format.height;
         max_width = format.width;
 
@@ -300,7 +300,7 @@ int main()
         cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
         cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
-        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
+        // std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
 
         cv::imshow("preview", result_frame);
 

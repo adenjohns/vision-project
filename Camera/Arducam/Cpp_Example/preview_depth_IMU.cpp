@@ -225,7 +225,7 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd dataIndices)
     }
 
     // Resize output vector to match the actual number of nonzero elements
-    return dataIndices.head(count);
+    dataIndices.head(count);
 }
 
 /**
