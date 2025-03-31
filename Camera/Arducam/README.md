@@ -26,24 +26,9 @@ Clone this repository and enter the directory.
   ./Install_dependencies.sh
 ```
 
-> Run the setup_rock_5a.sh if on rock 5a platform.
-
-```shell
-  ./setup_rock_5a.sh
-```
-
-### Install dependencies for Jetson
-
-> Run in the Arducam_tof_camera folder
-> Whatever you want to run the C/C++ examples or Python examples, you need to install the dependencies.
-
-```shell
-  ./Install_dependencies_jetson.sh
-```
-
 ## Run Examples
 
-> Platform: Raspberry Pi or Jetson
+> Platform: Raspberry Pi
 
 ### Depth Examples
 

@@ -121,7 +121,7 @@ def reset_closest_points(data, threshold):
     :param data: the 1D array that needs to be parsed.
     :param threshold: an experimental value that is the limit to how close an object should be distance wise 
 
-    :return: the indices of all the data points larger than zero. 
+    :return: 1D array of all the indices of all the data points larger than zero. 
     """ 
     
     data[data > threshold] = 0 # set data greater than threshold to zero 
@@ -233,10 +233,9 @@ def main():
             # print(f"Num Rows: {depth_array.shape[0]}\n") # number of rows
             # print(f"Num Cols: {depth_array.shape[1]}\n") # number of cols
 
-            threshold = 2999 # EXPERIMENTAL VALUE, will need to check with multiple iterations 
-            n = 84 # average width of gap or free walking path
-            row_start = 60 # EXPERIMANTAL VALUE
-            row_end = 120 # EXPERIMENTAL VALUE
+            threshold = 2999 # EXPERIMENTAL VALUE, depth values of object at closest limit to user 
+            row_start = 60 # EXPERIMANTAL VALUE, depth value to first row from frame to parse
+            row_end = 120 # EXPERIMENTAL VALUE, depth value of last row from frame to parse
             
             sliced_data = min_data_rows(depth_array, row_start, row_end)
             data_indices = reset_closest_points(sliced_data, threshold)
