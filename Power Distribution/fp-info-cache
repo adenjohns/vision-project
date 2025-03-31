@@ -1,4 +1,4 @@
-24779170416844195
+24815781060462623
 1k
 RES_ERJ2RKF1001X
 
@@ -109,8 +109,8 @@ RASPBERRYPI_2X3_THMSMT
 
 
 0
-6
-6
+12
+12
 Adafruit 128x32 Pi OLED
 SOT23
 SOT-23
@@ -125,6 +125,153 @@ UG-2832HSWEG02_WRAPUNDER
 0
 14
 14
+Adafruit PowerBoost 1000C Rev B
+1X08_ROUND
+
+
+0
+8
+8
+Adafruit PowerBoost 1000C Rev B
+4UCONN_20329
+
+
+0
+11
+11
+Adafruit PowerBoost 1000C Rev B
+0805-NO
+
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+0805_10MGAP
+
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+ADAFRUIT_3.5MM
+
+
+0
+0
+0
+Adafruit PowerBoost 1000C Rev B
+ADAFRUIT_5MM
+
+
+0
+0
+0
+Adafruit PowerBoost 1000C Rev B
+C1210
+CAPACITOR
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+CHIPLED_0805_NOOUTLINE
+
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+FIDUCIAL_1MM
+
+
+0
+1
+1
+Adafruit PowerBoost 1000C Rev B
+INDUCTOR_5X5MM_TDK_VLC5045
+Source: http://www.tdk.co.jp/tefe02/e531_vlc5045.pdf
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+JSTPH2
+2-Pin JST PH Series Right-Angle Connector (+/- for batteries)
+
+0
+4
+4
+Adafruit PowerBoost 1000C Rev B
+MOUNTINGHOLE_2.5_PLATED
+
+
+0
+1
+1
+Adafruit PowerBoost 1000C Rev B
+PCBFEAT-REV-040
+Revision Level Field - 40 mil{return}{return}Set version with global board attribute '>REV'
+
+0
+0
+0
+Adafruit PowerBoost 1000C Rev B
+PVQFN-16
+
+
+0
+22
+22
+Adafruit PowerBoost 1000C Rev B
+QFN20_4MM
+20-Lead QFN 4x4mm Body, 0.5mm pitch{return}{return}Source: http://ww1.microchip.com/downloads/en/DeviceDoc/22090b.pdf
+
+0
+21
+21
+Adafruit PowerBoost 1000C Rev B
+SC59-BEC
+SC59 (SOT23) Motorola
+
+0
+3
+3
+Adafruit PowerBoost 1000C Rev B
+SYMBOL_MINUS
+ICON{return}{return}Minus Symbol
+
+0
+0
+0
+Adafruit PowerBoost 1000C Rev B
+SYMBOL_PLUS
+ICON{return}{return}Plus Sign Symbol
+
+0
+0
+0
+Adafruit PowerBoost 1000C Rev B
+TERMBLOCK_1X2-3.5MM
+
+
+0
+2
+2
+Adafruit PowerBoost 1000C Rev B
+USB_HOST-PTH
+
+
+0
+6
+6
+Adafruit PowerBoost 1000C Rev B
+_0805MP
+0805 MicroPitch
+
+0
+2
+2
 Audio_Module
 Reverb_BTDR-1H
 Digital Reverberation Unit, http://www.belton.co.kr/inc/downfile.php?seq=17&file=pdf (footprint from http://www.uk-electronic.de/PDF/BTDR-1.pdf)

@@ -1,0 +1,78 @@
+(footprint "PCBFEAT-REV-040"
+	(version 20241229)
+	(generator "pcbnew")
+	(generator_version "9.0")
+	(layer "F.Cu")
+	(descr "Revision Level Field - 40 mil\n\nSet version with global board attribute '>REV'")
+	(property "Reference" "REF**"
+		(at 0 0 0)
+		(layer "F.SilkS")
+		(uuid "babce890-8dea-4120-a5c5-e8e2d18f0e51")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "2d9627f1-6587-478d-a8ca-b0d53c165281")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "284b572f-90ba-45f3-ad93-7d048638fc2c")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "7f2bcc0a-8402-4b92-8d5d-ffd7ab053fe7")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(fp_circle
+		(center 0 0)
+		(end 0.898 0)
+		(stroke
+			(width 0.3048)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "179dced9-11c4-4bdf-949a-bb94c389d798")
+	)
+	(fp_text user "${REV}"
+		(at -0.3556 0.508 0)
+		(unlocked yes)
+		(layer "F.SilkS")
+		(uuid "a17e4083-270c-420a-a30b-780293569c5e")
+		(effects
+			(font
+				(size 0.8128 0.8128)
+				(thickness 0.2032)
+			)
+			(justify left bottom)
+		)
+	)
+	(embedded_fonts no)
+)
