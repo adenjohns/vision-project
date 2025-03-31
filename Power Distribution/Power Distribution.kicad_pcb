@@ -3403,6 +3403,17 @@
 		)
 		(embedded_fonts no)
 	)
+	(gr_rect
+		(start 80 24.5)
+		(end 141 112.5)
+		(stroke
+			(width 0.05)
+			(type default)
+		)
+		(fill no)
+		(layer "Edge.Cuts")
+		(uuid "ef1298b2-f2d9-4a64-89d6-f5b5d378dc72")
+	)
 	(gr_text "Battery"
 		(at 132 85.5 180)
 		(layer "F.SilkS")
@@ -3595,7 +3606,7 @@
 	)
 	(segment
 		(start 105 61.5)
-		(end 109.5 61.5)
+		(end 108.5 61.5)
 		(width 0.2)
 		(layer "F.Cu")
 		(net 0)
@@ -3744,6 +3755,14 @@
 		(layer "F.Cu")
 		(net 0)
 		(uuid "24516113-df2c-4dcc-a35f-096cbd090bfe")
+	)
+	(segment
+		(start 109 61.5)
+		(end 109.5 61)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 0)
+		(uuid "247102b3-aa9d-4eb2-aaf9-18858df1642b")
 	)
 	(segment
 		(start 128.27 45.89)
@@ -3944,6 +3963,14 @@
 		(layer "F.Cu")
 		(net 0)
 		(uuid "453af7d2-b111-4766-afc9-607eedb65182")
+	)
+	(segment
+		(start 109.5 61)
+		(end 109.5 59.14)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 0)
+		(uuid "47d0bbd0-cba1-42a5-8f12-13a8693117ec")
 	)
 	(segment
 		(start 128.27 43.23)
@@ -4290,14 +4317,6 @@
 		(uuid "9d612d85-e0d4-463f-916c-343daded81ad")
 	)
 	(segment
-		(start 109.5 61.5)
-		(end 109.5 59.14)
-		(width 0.2)
-		(layer "F.Cu")
-		(net 0)
-		(uuid "9e9e592d-714c-44e0-afe7-4c5ad32bcc08")
-	)
-	(segment
 		(start 104.5 68)
 		(end 104.5 97.32)
 		(width 0.2)
@@ -4338,7 +4357,7 @@
 		(uuid "a8634131-53fd-494d-b7ed-e4f0f723230f")
 	)
 	(segment
-		(start 109.5 61.5)
+		(start 109.5 62)
 		(end 109.5 68.25)
 		(width 0.2)
 		(layer "F.Cu")
@@ -4352,6 +4371,14 @@
 		(layer "F.Cu")
 		(net 0)
 		(uuid "aa1f6c9c-2ade-4423-a31d-0e5dbd1c487f")
+	)
+	(segment
+		(start 109 61.5)
+		(end 109.5 62)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 0)
+		(uuid "ae9f2e6e-ab8f-400c-a725-477354ac49a5")
 	)
 	(segment
 		(start 118.353 73.647)
@@ -4472,6 +4499,14 @@
 		(layer "F.Cu")
 		(net 0)
 		(uuid "cdd7ae1e-4d33-43ec-918f-81279444f4cc")
+	)
+	(segment
+		(start 108.5 61.5)
+		(end 109 61.5)
+		(width 0.2)
+		(layer "F.Cu")
+		(net 0)
+		(uuid "cdf340ac-81fb-44a4-bcdb-12094f61d56b")
 	)
 	(segment
 		(start 113 53)
