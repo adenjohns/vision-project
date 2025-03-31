@@ -6,7 +6,7 @@
 	(paper "A4")
 	(title_block
 		(title "Proposed Power Distribution Schematics")
-		(rev "V2.3")
+		(rev "V3.2")
 		(company "VISION")
 	)
 	(lib_symbols
