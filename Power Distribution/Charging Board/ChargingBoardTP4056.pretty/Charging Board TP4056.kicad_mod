@@ -3,11 +3,11 @@
 	(generator "pcbnew")
 	(generator_version "9.0")
 	(layer "F.Cu")
-	(property "Reference" "REF**"
+	(property "Reference" "TP4056 & MT3608"
 		(at 1 2 0)
 		(unlocked yes)
 		(layer "F.SilkS")
-		(uuid "0b4717a5-a50b-4eb4-ba44-66ab635fb33b")
+		(uuid "f9f702d4-4fff-49ef-b344-5e45bbb0bfb0")
 		(effects
 			(font
 				(size 1 1)
@@ -19,7 +19,7 @@
 		(at 1 3.5 0)
 		(unlocked yes)
 		(layer "F.Fab")
-		(uuid "8c1572cb-050c-4718-a738-f4ff7514d216")
+		(uuid "58ea116f-4549-4dbc-905c-769d6cd9393e")
 		(effects
 			(font
 				(size 1 1)
@@ -32,7 +32,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "d17f4e5b-09c6-4177-9ce5-655862faf988")
+		(uuid "5125d2d8-c3aa-4d92-b093-e79cc75abaa8")
 		(effects
 			(font
 				(size 1 1)
@@ -45,7 +45,7 @@
 		(unlocked yes)
 		(layer "F.Fab")
 		(hide yes)
-		(uuid "53af5944-6ca9-42f5-a38f-8b979804e075")
+		(uuid "bdc7f87b-23e2-4203-a418-11fdfd673e6f")
 		(effects
 			(font
 				(size 1 1)
@@ -146,20 +146,8 @@
 			(justify bottom)
 		)
 	)
-	(fp_text user "REF**"
-		(at 1 5 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(uuid "3065266e-618d-49a6-b3c6-60efe658498f")
-		(effects
-			(font
-				(size 1 1)
-				(thickness 0.125)
-			)
-		)
-	)
 	(pad "1" thru_hole circle
-		(at -9.5 -4)
+		(at -9.7 -4.3)
 		(size 2 2)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
@@ -167,7 +155,7 @@
 		(uuid "ac52d200-af03-46e1-b4a8-531c378abbe9")
 	)
 	(pad "2" thru_hole circle
-		(at -1 -4)
+		(at -1.2 -4.3)
 		(size 2 2)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
@@ -175,7 +163,7 @@
 		(uuid "7f560328-9ac9-45e7-b778-40c8a45aed91")
 	)
 	(pad "3" thru_hole circle
-		(at 2.3 -4)
+		(at 2.8 -4.3)
 		(size 2 2)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
@@ -183,7 +171,7 @@
 		(uuid "40d652e1-a3b6-4d73-b263-cb078144cf9e")
 	)
 	(pad "4" thru_hole circle
-		(at 11 -4)
+		(at 11.3 -4.3)
 		(size 2 2)
 		(drill 1)
 		(layers "*.Cu" "*.Mask")
