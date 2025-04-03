@@ -279,7 +279,7 @@ int main()
 
         float *depth_ptr = (float *)frame->getData(FrameType::DEPTH_FRAME);
         float *confidence_ptr = (float *)frame->getData(FrameType::CONFIDENCE_FRAME);
-        // getPreview(preview_ptr, depth_ptr, confidence_ptr);
+        getPreview(preview_ptr, depth_ptr, confidence_ptr);
 
         cv::Mat result_frame(format.height, format.width, CV_8U, preview_ptr);
         cv::Mat depth_frame(format.height, format.width, CV_32F, depth_ptr);
@@ -304,9 +304,12 @@ int main()
 
         cv::imshow("preview", result_frame);
 
+        // PATH PLANNING CODE
         // #######################################################################################
         MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols); // Matrix output for convertMatToEigen(). A 2D array of depth data converted to an Eigen matrix.
         convertMatToEigen(depth_frame, depth_matrix);
+        
+        std::cout << "Matrix:" << std::end1 << depth_matrix << std::end1;
 
         int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
         int row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
