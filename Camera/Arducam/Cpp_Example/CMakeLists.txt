@@ -21,12 +21,6 @@ target_link_libraries(preview_depth_IMU ${CXXLIBS} ${OpenCV_LIBS} ${PIGPIO_LIBS}
 # add_executable(preview_depth preview_depth.cpp)
 # target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
 
-# add_executable(capture_raw capture_raw.cpp)
-# target_link_libraries(capture_raw ${CXXLIBS} ${OpenCV_LIBS})
-
-# add_executable(preview_usb preview_by_usb.cpp)
-# target_link_libraries(preview_usb ${CXXLIBS} ${OpenCV_LIBS})
-
 # aux_source_directory(example DIR_SRCS)
 # add_executable(example ${DIR_SRCS})
 # target_link_libraries(example ${CXXLIBS} ${OpenCV_LIBS})
