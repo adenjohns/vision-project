@@ -2,24 +2,10 @@
 #include <chrono>
 #include <fstream>
 #include <iostream>
-
-#include <unistd.h> // IMU libraries
-#include <iomanip>
-#include <csignal>
-#include <pigpio.h>
-#include "RPI_BNO055.h"
-#include <cmath>
-#include <cstdlib>
-
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <Eigen/Dense>
-
-
-
-// Flag to control IMU program execution
-volatile bool running = true;
 
 using namespace Arducam;
 
@@ -42,21 +28,6 @@ void on_confidence_changed(int pos, void *userdata)
 {
     //
 }
-
-
-
-// Function to check if two (IMU) values differ by at least threshold (will use this for termination)
-bool hasChangedBy(float current, float previous, float threshold) {
-    return std::abs(current - previous) >= threshold;
-}
-
-// Signal handler for Ctrl+C (IMU CODE INTEGRATION)
-void signalHandler(int signum) {
-    std::cout << "\nInterrupt signal (" << signum << ") received.\n";
-    running = false;
-}
-
-
 
 void display_fps(void)
 {
@@ -270,60 +241,6 @@ void convertMatToEigen(cv::Mat depth_mat, MatrixXd depth_matrix)
 
 int main()
 {
-    // Register signal handler
-    signal(SIGINT, signalHandler);
-    std::cout << "Activating BNO055 Sensor using pigpio\n";
-    gpioInitialise();  // Initialize pigpio early
-
-    // This whole section is just to check if the i2c is working (and device is on correct bus)
-    int handle = i2cOpen(3, 0x28, 0);
-    if (handle < 0) {
-        std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
-    } else {
-        std::cout << "Direct i2cOpen test succeeded with handle: " << handle << std::endl;
-        i2cClose(handle);
-    }
-
-    // Create sensor instance with bus 1 and address 0x28
-    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 1);  // Try using bus 1 instead (should be the case)
-    
-    // Initialize the sensor 
-    if (!bno.begin()) {
-        std::cerr << "Failed to initialize BNO055 sensor!\n";
-        return -1;
-    }
-    
-    std::cout << "BNO055 sensor initialized successfully!\n";
-    
-    // Set external crystal for better accuracy (if available)
-    bno.setExtCrystalUse(true);
-    
-    // Get chip information
-    bno055_rev_info_t revInfo;
-    bno.getRevInfo(&revInfo);
-    
-    std::cout << "Sensor Information:\n";
-    std::cout << "- System Rev: " << (int)revInfo.bl_rev << "\n";
-    std::cout << "- Accelerometer Rev: " << (int)revInfo.accel_rev << "\n";
-    std::cout << "- Gyroscope Rev: " << (int)revInfo.gyro_rev << "\n";
-    std::cout << "- Magnetometer Rev: " << (int)revInfo.mag_rev << "\n";
-    std::cout << "- Software Rev: " << revInfo.sw_rev << "\n";
-    
-    std::cout << "\nReading sensor data...\n";
-    std::cout << "Press Ctrl+C to exit\n\n";
-    
-    // Variables for motion detection
-    imu::Vector<3> previousGyro;
-    bool firstReading = true;
-    std::chrono::steady_clock::time_point lastMotionTime;
-    const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
-    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
-
-
-
-
-
-
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
     if (tof.open(Connection::CSI, 0))
@@ -347,79 +264,8 @@ int main()
     cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);
     cv::setMouseCallback("preview", onMouse);
 
-    while (running)
+    for (;;)
     {
-        uint8_t system, gyro, accel, mag;
-        bno.getCalibration(&system, &gyro, &accel, &mag);
-
-        // Display calibration status (0-3, where 3 is fully calibrated)
-        std::cout << "\033[2K\r"; // Clear current line
-        std::cout << "Calibration: Sys=" << (int)system << " Gyro=" << (int)gyro 
-                  << " Accel=" << (int)accel << " Mag=" << (int)mag << " | ";
-        
-        // Read Euler angles (in degrees)
-        imu::Vector<3> euler = bno.getVector(VECTOR_EULER);
-        
-        // Read acceleration values (in m/s^2)
-        imu::Vector<3> accelData = bno.getVector(VECTOR_ACCELEROMETER);
-        
-        // Read gyroscope values (in deg/s)
-        imu::Vector<3> gyroData = bno.getVector(VECTOR_GYROSCOPE);
-        
-        // Check for significant motion
-        bool motionDetected = false;
-        
-        if (!firstReading) {
-            motionDetected = hasChangedBy(gyroData.x(), previousGyro.x(), MOTION_THRESHOLD) ||
-                             hasChangedBy(gyroData.y(), previousGyro.y(), MOTION_THRESHOLD) ||
-                             hasChangedBy(gyroData.z(), previousGyro.z(), MOTION_THRESHOLD);
-            
-            if (motionDetected) {
-                lastMotionTime = std::chrono::steady_clock::now();
-            } else {
-                // Check if timeout has elapsed
-                auto currentTime = std::chrono::steady_clock::now();
-                auto elapsedSeconds = std::chrono::duration_cast<std::chrono::seconds>(
-                    currentTime - lastMotionTime).count();
-                
-                // Display remaining time before shutdown
-                std::cout << " | No motion for " << elapsedSeconds << "s";
-                
-                if (elapsedSeconds >= SHUTDOWN_TIMEOUT) {
-                    std::cout << "\nNo significant motion detected for " << SHUTDOWN_TIMEOUT 
-                              << " seconds. Shutting down...\n";
-                    std::system("sudo shutdown -h now");
-                    running = false;
-                    break;
-                }
-            }
-        } else {
-            // Initialize for first iteration
-            firstReading = false;
-            lastMotionTime = std::chrono::steady_clock::now();
-        }
-        
-        // Save values for next comparison
-        previousGyro = gyroData;
-        
-        // Display orientation data (euler)
-        std::cout << "    Orientation: ";
-        std::cout << "X=" << std::fixed << std::setprecision(2) << euler.x() << "° ";
-        std::cout << "Y=" << std::fixed << std::setprecision(2) << euler.y() << "° ";
-        std::cout << "Z=" << std::fixed << std::setprecision(2) << euler.z() << "°";
-        
-        // Get temp (idk if we need this but just in case)
-        int8_t temp = bno.getTemp();
-        std::cout << " | Temp=" << (int)temp << "°C";
-        
-        std::cout << std::flush; // Ensure output is displayed
-        
-        // Wait a bit - using gpioDelay for more precise timing
-        gpioDelay(100000); // 100ms (can be changed depending on desired sampling rate)
-
-
-
-
         Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr)
@@ -427,7 +273,7 @@ int main()
             continue;
         }
         frame->getFormat(FrameType::DEPTH_FRAME, format);
-        std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
+        // std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
         max_height = format.height;
         max_width = format.width;
 
@@ -454,17 +300,33 @@ int main()
         cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
         cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
-        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
+        // std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
 
         cv::imshow("preview", result_frame);
 
+
+        // #######################################################################################
+        // PATH PLANNING CODE
         // #######################################################################################
         MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols); // Matrix output for convertMatToEigen(). A 2D array of depth data converted to an Eigen matrix.
         convertMatToEigen(depth_frame, depth_matrix);
+        
+        // std::cout << "Matrix:" << std::endl << depth_matrix << std::endl;
+        
+        MatrixXd m(5,10);
+        m << 1, 1, 3, 4, 5, 2, 3, 6, 7, 4,
+             1, 2, 4, 2, 5, 3, 1, 6, 7, 4,
+             1, 1, 4, 2, 5, 3, 1, 6, 7, 4,
+             1, 1, 4, 2, 5, 3, 1, 6, 7, 4,
+             1, 1, 3, 4, 5, 2, 3, 6, 7, 4;
 
-        int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
-        int row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
-        int row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+        int threshold = 5; // EXPERIMENTAL VALUE, depth values of object at closest limit to user 2999
+        int row_start = 1;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse 60 
+        int row_end = 3;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse 120
+
+        // int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
+        // int row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
+        // int row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
 
         VectorXd col_max_val(depth_matrix.cols()); // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
         min_data_rows(depth_matrix, row_start, row_end, col_max_val);
@@ -474,9 +336,7 @@ int main()
 
         auto [max_length, max_start_idx, max_end_idx] = find_largest_gap(data_indices);
 
-        cout << "Max Length: " << max_length << endl;
-        cout << "Max Start Index: " << max_start_idx << endl;
-        cout << "Max End Index: " << max_end_idx << endl;
+        cout << "Max Length: " << max_length << " Max Start Index: " << max_start_idx << " Max End Index: " << max_end_idx << endl;
 
         // #######################################################################################
 
@@ -502,7 +362,6 @@ int main()
     {
         return -1;
     }
-    std::cout << "\nExiting...\n"; 
-    return 0;
 
+    return 0;
 }

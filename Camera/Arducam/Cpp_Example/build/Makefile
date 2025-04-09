@@ -117,65 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named preview_depth_IMU
+# Target rules for targets named hello_world
 
 # Build rule for target.
-preview_depth_IMU: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preview_depth_IMU
-.PHONY : preview_depth_IMU
+hello_world: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hello_world
+.PHONY : hello_world
 
 # fast build rule for target.
-preview_depth_IMU/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/build
-.PHONY : preview_depth_IMU/fast
+hello_world/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/build
+.PHONY : hello_world/fast
 
-RPI_BNO055.o: RPI_BNO055.cpp.o
-.PHONY : RPI_BNO055.o
-
-# target to build an object file
-RPI_BNO055.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o
-.PHONY : RPI_BNO055.cpp.o
-
-RPI_BNO055.i: RPI_BNO055.cpp.i
-.PHONY : RPI_BNO055.i
-
-# target to preprocess a source file
-RPI_BNO055.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.i
-.PHONY : RPI_BNO055.cpp.i
-
-RPI_BNO055.s: RPI_BNO055.cpp.s
-.PHONY : RPI_BNO055.s
-
-# target to generate assembly for a file
-RPI_BNO055.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.s
-.PHONY : RPI_BNO055.cpp.s
-
-preview_depth_IMU.o: preview_depth_IMU.cpp.o
-.PHONY : preview_depth_IMU.o
+src/hello_world.o: src/hello_world.cpp.o
+.PHONY : src/hello_world.o
 
 # target to build an object file
-preview_depth_IMU.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o
-.PHONY : preview_depth_IMU.cpp.o
+src/hello_world.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.o
+.PHONY : src/hello_world.cpp.o
 
-preview_depth_IMU.i: preview_depth_IMU.cpp.i
-.PHONY : preview_depth_IMU.i
+src/hello_world.i: src/hello_world.cpp.i
+.PHONY : src/hello_world.i
 
 # target to preprocess a source file
-preview_depth_IMU.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.i
-.PHONY : preview_depth_IMU.cpp.i
+src/hello_world.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.i
+.PHONY : src/hello_world.cpp.i
 
-preview_depth_IMU.s: preview_depth_IMU.cpp.s
-.PHONY : preview_depth_IMU.s
+src/hello_world.s: src/hello_world.cpp.s
+.PHONY : src/hello_world.s
 
 # target to generate assembly for a file
-preview_depth_IMU.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth_IMU.dir/build.make CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.s
-.PHONY : preview_depth_IMU.cpp.s
+src/hello_world.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.s
+.PHONY : src/hello_world.cpp.s
 
 # Help Target
 help:
@@ -185,13 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... preview_depth_IMU"
-	@echo "... RPI_BNO055.o"
-	@echo "... RPI_BNO055.i"
-	@echo "... RPI_BNO055.s"
-	@echo "... preview_depth_IMU.o"
-	@echo "... preview_depth_IMU.i"
-	@echo "... preview_depth_IMU.s"
+	@echo "... hello_world"
+	@echo "... src/hello_world.o"
+	@echo "... src/hello_world.i"
+	@echo "... src/hello_world.s"
 .PHONY : help
 
 
