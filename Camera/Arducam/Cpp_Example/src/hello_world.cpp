@@ -64,7 +64,7 @@ std::tuple<int, int, int> find_largest_gap(VectorXd data_indices)
 /**
  * @brief min_data_rows(MatrixXd array, int row_start, int row_end)
  *
- * Sets data great than threshold to zero and returns the indices of all data points larger than zero.
+ * Sets data greater than threshold to zero and returns the indices of all data points larger than zero.
  *
  * @param data The 1D array that needs to be parsed.
  * @param threshold An experimental value that is the limit to how close an object should be distance wise.
@@ -73,7 +73,6 @@ std::tuple<int, int, int> find_largest_gap(VectorXd data_indices)
 void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
 {
     int count = 0;
-    // cout << data << endl;
 
     // Iterate through the vector and apply thresholding
     for (int i = 0; i < data.size(); ++i)
@@ -91,8 +90,6 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
 
     // Resize output vector to match the actual number of nonzero elements
     dataIndices.head(count);
-    
-    cout << dataIndices << "/n" << endl;
 }
 
 /**
@@ -107,13 +104,23 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
  * @param row_end An experimental value of the end of the rows that need to be parsed.
  * @return void. A 1D array of the min distance out of each col between row_start and row_end.
  */
-void min_data_rows(MatrixXd array, int row_start, int row_end, VectorXd& col_max_val)
+void min_data_rows(MatrixXd array, int row_start, int row_end, int window_size, VectorXd& col_avg_val)
 {
+    int num_rows = row_end - row_start;
+    int num_cols = array.cols();
+    
     // Extract the submatrix (slicing rows from the given start row to the end row)
-    MatrixXd sliced_arr = array.block(row_start, 0, row_end - row_start, array.cols());
+    MatrixXd sliced_arr = array.block(row_start, 0, num_rows, num_cols);
+    MatrixXd smoothed = MatrixXd::Zero(num_rows - window_size + 1, num_cols); 
+    
+    for (int i = 0; i <= num_rows - window_size; ++i){
+        smoothed.row(i) = sliced_arr.block(i, 0, window_size, num_cols).colwise().mean();
+    }
 
-    // Compute max along each column
-    col_max_val = sliced_arr.colwise().maxCoeff();
+    // Compute average along each column    
+    col_avg_val = smoothed.colwise().mean();
+    
+    cout << col_avg_val << endl;
 }
 
 int main()
@@ -127,26 +134,18 @@ int main()
          
     int threshold = 5; // EXPERIMENTAL VALUE, depth values of object at closest limit to user 2999
     int row_start = 1;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse 60 
-    int row_end = 4;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse 120
+    int row_end = 5;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse 120
+    int window_size = 2;
     
     VectorXd col_max_val(m.cols()); // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
-    min_data_rows(m, row_start, row_end, col_max_val);
+    min_data_rows(m, row_start, row_end, window_size, col_max_val);
 
     VectorXd data_indices(col_max_val.size()); // Vector output for reset_closet_points(). 1D array of all the indices of the data points larger than zero.
     reset_closest_points(col_max_val, threshold, data_indices);
     
-    cout << data_indices << "/n" << endl;
-
     auto [max_length, max_start_idx, max_end_idx] = find_largest_gap(data_indices);
 
     cout << "Max Length: " << max_length << " Max Start Index: " << max_start_idx << " Max End Index: " << max_end_idx << endl;
-
-    // MatrixXd m(2, 2);
-    // m(0, 0) = 3;
-    // m(1, 0) = 2.5;
-    // m(0, 1) = -1;
-    // m(1, 1) = m(1, 0) + m(0, 1);
-    // std::cout << m << std::endl;
 
     return 0;
 }
