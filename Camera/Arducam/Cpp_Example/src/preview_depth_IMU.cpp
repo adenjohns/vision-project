@@ -412,6 +412,15 @@ int main()
         int8_t temp = bno.getTemp();
         std::cout << " | Temp=" << (int)temp << "°C";
         
+        // Head Tilt Calculation:
+        // With the sensor mounted so that the z-axis points upward (toward the sky)
+        // and the y-axis points forward from the glasses, a head tilt downward will yield
+        // a change in the accelerometer's y and z readings.
+        // A positive angle indicates that the user is looking downward.
+        double headTiltRad = atan2(accelData.y(), -accelData.z()); // Tilt angle computation
+        double headTiltDeg = headTiltRad * 180.0 / M_PI;
+        std::cout << " | Head Tilt: " << std::fixed << std::setprecision(2) << headTiltDeg << "°";
+
         std::cout << std::flush; // Ensure output is displayed
         
         // Wait a bit - using gpioDelay for more precise timing
@@ -465,8 +474,20 @@ int main()
         convertMatToEigen(depth_frame, depth_matrix);
 
         int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
-        int row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
-        int row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+        int base_row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
+        int base_row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+
+        // So if the user tilts their head upward, headTiltDeg offset becomes more negative
+        // and shifts the region downward on the depth image, objects of interest move lower in the frame
+        // Conversely, a downward tilt (positive headTiltDeg) will shift the ROI upward
+        // Tracks objects at the same physical leel that the user is looking at, regardless of head tilt
+        // Compute dynamic offset
+        double scale_factor = 0.5; // pixels per degree, adjust scale_factor to control sensitivity
+        int offset = static_cast<int>(scale_factor * headTiltDeg);
+        
+        // Adjust the region, clamp to the image boundaries
+        int row_start = std::max(0, base_row_start + offset);
+        int row_end = std::min(max_height - 1, base_row_end + offset);
 
         VectorXd col_max_val(depth_matrix.cols()); // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
         min_data_rows(depth_matrix, row_start, row_end, col_max_val);
