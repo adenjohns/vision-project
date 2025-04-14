@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth.cpp" "CMakeFiles/preview_depth.dir/preview_depth.cpp.o" "gcc" "CMakeFiles/preview_depth.dir/preview_depth.cpp.o.d"
+  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth.cpp" "CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o" "gcc" "CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o.d"
   )
 
 # Targets to which this target links.

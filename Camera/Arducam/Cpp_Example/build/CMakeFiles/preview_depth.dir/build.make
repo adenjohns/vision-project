@@ -69,28 +69,28 @@ include CMakeFiles/preview_depth.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/preview_depth.dir/flags.make
 
-CMakeFiles/preview_depth.dir/preview_depth.cpp.o: CMakeFiles/preview_depth.dir/flags.make
-CMakeFiles/preview_depth.dir/preview_depth.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth.cpp
-CMakeFiles/preview_depth.dir/preview_depth.cpp.o: CMakeFiles/preview_depth.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/preview_depth.dir/preview_depth.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth.dir/preview_depth.cpp.o -MF CMakeFiles/preview_depth.dir/preview_depth.cpp.o.d -o CMakeFiles/preview_depth.dir/preview_depth.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth.cpp
+CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o: CMakeFiles/preview_depth.dir/flags.make
+CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth.cpp
+CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o: CMakeFiles/preview_depth.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o -MF CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o.d -o CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth.cpp
 
-CMakeFiles/preview_depth.dir/preview_depth.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth.dir/preview_depth.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth.cpp > CMakeFiles/preview_depth.dir/preview_depth.cpp.i
+CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth.cpp > CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i
 
-CMakeFiles/preview_depth.dir/preview_depth.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth.dir/preview_depth.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth.cpp -o CMakeFiles/preview_depth.dir/preview_depth.cpp.s
+CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth.cpp -o CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s
 
 # Object files for target preview_depth
 preview_depth_OBJECTS = \
-"CMakeFiles/preview_depth.dir/preview_depth.cpp.o"
+"CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o"
 
 # External object files for target preview_depth
 preview_depth_EXTERNAL_OBJECTS =
 
-preview_depth: CMakeFiles/preview_depth.dir/preview_depth.cpp.o
+preview_depth: CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o
 preview_depth: CMakeFiles/preview_depth.dir/build.make
 preview_depth: /usr/lib/libArducamDepthCamera.so
 preview_depth: /usr/lib/aarch64-linux-gnu/libopencv_stitching.so.4.6.0

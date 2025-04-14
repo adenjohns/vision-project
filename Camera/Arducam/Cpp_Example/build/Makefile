@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named hello_world
+# Target rules for targets named preview_depth
 
 # Build rule for target.
-hello_world: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 hello_world
-.PHONY : hello_world
+preview_depth: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preview_depth
+.PHONY : preview_depth
 
 # fast build rule for target.
-hello_world/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/build
-.PHONY : hello_world/fast
+preview_depth/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/build
+.PHONY : preview_depth/fast
 
-src/hello_world.o: src/hello_world.cpp.o
-.PHONY : src/hello_world.o
+src/preview_depth.o: src/preview_depth.cpp.o
+.PHONY : src/preview_depth.o
 
 # target to build an object file
-src/hello_world.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.o
-.PHONY : src/hello_world.cpp.o
+src/preview_depth.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o
+.PHONY : src/preview_depth.cpp.o
 
-src/hello_world.i: src/hello_world.cpp.i
-.PHONY : src/hello_world.i
+src/preview_depth.i: src/preview_depth.cpp.i
+.PHONY : src/preview_depth.i
 
 # target to preprocess a source file
-src/hello_world.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.i
-.PHONY : src/hello_world.cpp.i
+src/preview_depth.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i
+.PHONY : src/preview_depth.cpp.i
 
-src/hello_world.s: src/hello_world.cpp.s
-.PHONY : src/hello_world.s
+src/preview_depth.s: src/preview_depth.cpp.s
+.PHONY : src/preview_depth.s
 
 # target to generate assembly for a file
-src/hello_world.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/hello_world.dir/build.make CMakeFiles/hello_world.dir/src/hello_world.cpp.s
-.PHONY : src/hello_world.cpp.s
+src/preview_depth.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s
+.PHONY : src/preview_depth.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... hello_world"
-	@echo "... src/hello_world.o"
-	@echo "... src/hello_world.i"
-	@echo "... src/hello_world.s"
+	@echo "... preview_depth"
+	@echo "... src/preview_depth.o"
+	@echo "... src/preview_depth.i"
+	@echo "... src/preview_depth.s"
 .PHONY : help
 
 

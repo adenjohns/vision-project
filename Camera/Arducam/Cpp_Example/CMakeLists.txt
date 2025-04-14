@@ -23,11 +23,11 @@ set(PIGPIO_LIBS pigpio rt pthread)
 # add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 
 # target_link_libraries(preview_depth_IMU ${CXXLIBS} ${OpenCV_LIBS} ${PIGPIO_LIBS})
 
-# add_executable(preview_depth src/preview_depth.cpp)
-# target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
+add_executable(preview_depth src/preview_depth.cpp)
+target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
 
 # aux_source_directory(example DIR_SRCS)
 # add_executable(example ${DIR_SRCS})
 # target_link_libraries(example ${CXXLIBS} ${OpenCV_LIBS})
 
-add_executable(hello_world src/hello_world.cpp)
+# add_executable(hello_world src/hello_world.cpp)
