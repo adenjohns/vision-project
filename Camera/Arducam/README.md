@@ -43,6 +43,11 @@ Clone this repository and enter the directory. The current repository used withi
 ```shell
   cd Python_Example
 ```
+> Turn on the Python virtual environment
+
+```shell
+  source venv/bin/activate
+```
 
 ```shell
   python3 follow_the_gap.py
