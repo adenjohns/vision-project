@@ -187,7 +187,7 @@ std::vector<Gap> find_largest_gaps(VectorXd data_indices, int topN = 2)
  * @param threshold : An experimental value that is the limit to how close an object should be distance wise.
  * @return void : 1D array of all the indices of the data points larger than zero is copied into dataIndices.
  */
-void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
+void reset_closest_points(VectorXd& data, int threshold, VectorXd& dataIndices)
 {
     int count = 0;
 
@@ -198,15 +198,12 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
         {
             data(i) = 0; // Set values greater than the threshold to zero
         }
-        else if (data(i) > 0)
+        if (data(i) > 0)
         {
             // Store indices of values that are still nonzero after thresholding
             dataIndices(count++) = i; // Store index
         }
     }
-
-    // Resize output vector to match the actual number of nonzero elements
-    dataIndices.head(count);
 }
 
 /**
@@ -221,7 +218,7 @@ void reset_closest_points(VectorXd data, int threshold, VectorXd& dataIndices)
  * @param row_end : An experimental value of the end of the rows that need to be parsed.
  * @return void : A 1D array of the min distance out of each col between row_start and row_end is copied into col_avg_val.
  */
-void min_data_rows(MatrixXd array, int row_start, int row_end, int window_size, VectorXd& col_avg_val)
+void avg_data_rows(MatrixXd array, int row_start, int row_end, int window_size, VectorXd& col_avg_val)
 {
     int num_rows = row_end - row_start;
     int num_cols = array.cols();
@@ -240,19 +237,17 @@ void min_data_rows(MatrixXd array, int row_start, int row_end, int window_size, 
     //}
     //// Compute average along each column    
     //col_avg_val = smoothed.colwise().mean();
-    
-    // TODO: double check output distances and see if they match with the threshold??? make moving average filter better??, work on imu shit 
 }
 
 /**
- * @brief MatrixXf convertMatToEigen(cv::Mat depth_mat)
+ * @brief Convert to an Eigen matrix.
  *
  * Converts the depth matrix to the Eigen matrix.
  *
  * @param depth_mat OpenCv's 2D depth data.
- * @return void. A 2D array of depth data converted to an Eigen matrix.
+ * @return void. A 2D matrix of depth data converted to an Eigen matrix.
  */
-void convertMatToEigen(cv::Mat depth_mat, MatrixXd depth_matrix)
+void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 {
     for (int i = 0; i < depth_mat.rows; ++i)
     {
@@ -342,7 +337,7 @@ int main()
         int window_size = 5;
 
         VectorXd col_max_val(depth_matrix.cols());                                     // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
-        min_data_rows(depth_matrix, row_start, row_end, window_size, col_max_val);
+        avg_data_rows(depth_matrix, row_start, row_end, window_size, col_max_val);
 
         VectorXd data_indices(col_max_val.size());                                     // Vector output for reset_closet_points(). 1D array of all the indices of the data points larger than zero.
         reset_closest_points(col_max_val, threshold, data_indices);
@@ -355,12 +350,14 @@ int main()
         }
         else 
         {
+            cout << "Gaps: ";
             for (size_t i = 0; i < gaps.size(); ++i) 
             {
-                cout << "Gap " << i + 1 
+                cout << "[Gap " << i + 1 
                      << " -> Start: " << gaps[i].start << " End: " << gaps[i].end << ""
-                     << ", Length: " << gaps[i].length() << "\n";
+                     << ", Len: " << gaps[i].length() << "] ";
             }
+            cout << "\n";
         }
 
         // #######################################################################################
