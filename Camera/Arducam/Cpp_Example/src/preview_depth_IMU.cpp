@@ -18,6 +18,9 @@
 #include <vector> 
 #include <algorithm> 
 
+// Include the audio feedback header
+#include "audio_feedback.cpp"
+
 // Flag to control IMU program execution
 volatile bool running = true;
 
@@ -282,6 +285,12 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 
 int main()
 {
+    // Initialize audio feedback
+    AudioFeedback audio;
+    if (!audio.initialize()) {
+        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        return -1;
+    }
     
     // ###########################################################################################################
     // IMU SETUP 
@@ -496,33 +505,30 @@ int main()
         // PATH PLANNING CODE
         // #######################################################################################
         
-        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols);                      // Matrix output for convertMatToEigen(). A 2D array of depth data converted to an Eigen matrix.
+        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols);                      
         convertMatToEigen(depth_frame, depth_matrix);
 
-        int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
-        int base_row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
-        int base_row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+        int threshold = 2999; 
+        int base_row_start = 60;   
+        int base_row_end = 120;    
         int window_size = 5;
 
-        // So if the user tilts their head upward, headTiltDeg offset becomes more negative
-        // and shifts the region downward on the depth image, objects of interest move lower in the frame
-        // Conversely, a downward tilt (positive headTiltDeg) will shift the ROI upward
-        // Tracks objects at the same physical leel that the user is looking at, regardless of head tilt
-        // Compute dynamic offset
-        double scale_factor = 0.5; // pixels per degree, adjust scale_factor to control sensitivity
+        double scale_factor = 0.5;
         int offset = static_cast<int>(scale_factor * headTiltDeg);
         
-        // Adjust the region, clamp to the image boundaries
         int row_start = std::max(0, base_row_start + offset);
         int row_end = std::min(max_height - 1, base_row_end + offset);
 
-        VectorXd col_max_val(depth_matrix.cols());                                     // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
+        VectorXd col_max_val(depth_matrix.cols());                                     
         avg_data_rows(depth_matrix, row_start, row_end, window_size, col_max_val);
 
-        VectorXd data_indices(col_max_val.size());                                     // Vector output for reset_closet_points(). 1D array of all the indices of the data points larger than zero.
+        VectorXd data_indices(col_max_val.size());                                     
         reset_closest_points(col_max_val, threshold, data_indices);
 
         auto gaps = find_largest_gaps(data_indices, 2);
+        
+        // Update audio feedback based on the gaps
+        audio.updateAudio(gaps, format.width);
         
         if (gaps.empty()) 
         { 
@@ -556,6 +562,7 @@ int main()
         tof.releaseFrame(frame);
     }
 
+    // Clean up
     if (tof.stop())
     {
         return -1;
@@ -565,7 +572,10 @@ int main()
     {
         return -1;
     }
+    
+    // Stop audio feedback
+    audio.stop();
+    
     std::cout << "\nExiting...\n"; 
     return 0;
-
 }
