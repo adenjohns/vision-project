@@ -13,7 +13,41 @@ from board import SCL, SDA
 import busio
 from PIL import Image, ImageDraw, ImageFont
 import adafruit_ssd1306
+import pigpio
 
+# Attempt to connect to the pigpio daemon
+pi = pigpio.pi()
+
+# 8-bit value
+x = 1
+b0 = 0
+b1 = 0
+b2 = 0
+b3 = 0
+b4 = 0
+b5 = 0
+b6 = 0
+b7 = 0
+
+# GPIO Pins
+DB0 = 23 # GPIO23, pin 16
+DB1 = 24 # GPIO24, pin 18
+DB2 = 10 # GPIO10, pin 19
+DB3 = 9 # GPIO9, pin 21
+DB4 = 25 # GPIO25, pin 22
+DB5 = 11 # GPIO11, pin 23
+DB6 = 8 # GPIO8, pin 24
+DB7 = 7 # GPIO7, pin 26
+
+# Setting each pins as input
+pi.set_mode(DB0, pigpio.INPUT)
+pi.set_mode(DB1, pigpio.INPUT)
+pi.set_mode(DB2, pigpio.INPUT)
+pi.set_mode(DB3, pigpio.INPUT)
+pi.set_mode(DB4, pigpio.INPUT)
+pi.set_mode(DB5, pigpio.INPUT)
+pi.set_mode(DB6, pigpio.INPUT)
+pi.set_mode(DB7, pigpio.INPUT)
 
 # Create the I2C interface.
 i2c = busio.I2C(SCL, SDA)
@@ -44,8 +78,6 @@ draw.rectangle((0, 0, width, height), outline=0, fill=0)
 padding = -2
 top = padding
 bottom = height - padding
-# Move left to right keeping track of the current x position for drawing shapes.
-x = 0
 
 
 # Load default font.
@@ -60,23 +92,45 @@ while True:
     # Draw a black filled box to clear the image.
     draw.rectangle((0, 0, width, height), outline=0, fill=0)
 
-    # Shell scripts for system monitoring from here:
-    # https://unix.stackexchange.com/questions/119126/command-to-display-memory-usage-disk-usage-and-cpu-load
-    cmd = "hostname -I | cut -d' ' -f1"
-    IP = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    cmd = 'cut -f 1 -d " " /proc/loadavg'
-    CPU = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    cmd = "free -m | awk 'NR==2{printf \"Mem: %s/%s MB  %.2f%%\", $3,$2,$3*100/$2 }'"
-    MemUsage = subprocess.check_output(cmd, shell=True).decode("utf-8")
-    cmd = 'df -h | awk \'$NF=="/"{printf "Disk: %d/%d GB  %s", $3,$2,$5}\''
-    Disk = subprocess.check_output(cmd, shell=True).decode("utf-8")
+    # Reading each pins
+    if pi.read(7) == 1:
+        time.sleep(0.001)
+        b7 = 1
+    if pi.read(8) == 1:
+        time.sleep(0.001)
+        b6 = 1
+    if pi.read(11) == 1:
+        time.sleep(0.001)
+        b5 = 1
+    if pi.read(25) == 1:
+        time.sleep(0.001)
+        b4 = 1
+    if pi.read(9) == 1:
+        time.sleep(0.001)
+        b3 = 1
+    if pi.read(10) == 1:
+        time.sleep(0.001)
+        b2 = 1
+    if pi.read(24) == 1:
+        time.sleep(0.001)
+        b1 = 1
+    if pi.read(23) == 1:
+        time.sleep(0.001)
+        b0 = 1
+
+    # Setting the 8-bit value
+    x = (1*b0) + (2*b1) + (4*b2) + (8*b3) + (16*b4) + (32*b5) + (64*b6) + (128*b7)
+
+    # Printing the Battery Value
+    text_str = f"Battery: {x}"
+    draw.text((0, top + 0), text_str, font=font, fill=255)
 
     # Write four lines of text.
 
-    draw.text((x, top + 0), "IP: " + IP, font=font, fill=255)
-    draw.text((x, top + 8), "CPU load: " + CPU, font=font, fill=255)
-    draw.text((x, top + 16), MemUsage, font=font, fill=255)
-    draw.text((x, top + 25), Disk, font=font, fill=255)
+    # draw.text((x, top + 0), "IP: " + IP, font=font, fill=255)
+    # draw.text((x, top + 8), "CPU load: " + CPU, font=font, fill=255)
+    # draw.text((x, top + 16), MemUsage, font=font, fill=255)
+    # draw.text((x, top + 25), Disk, font=font, fill=255)
 
     # Display image.
     disp.image(image)
