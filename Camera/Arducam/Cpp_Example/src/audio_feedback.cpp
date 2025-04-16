@@ -70,23 +70,27 @@ public:
         // Calculate the center of the gap
         float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
         
-        // Normalize the center position to [-1, 1] range
-        // where -1 is far left, 0 is center, 1 is far right
-        float normalizedPos = (2.0f * gapCenter / imageWidth) - 1.0f;
+        // Calculate the center of the image
+        float imageCenter = imageWidth / 2.0f;
         
-        // Calculate left and right volumes
-        // When path is on the left (normalizedPos < 0), left speaker gets louder
-        // When path is on the right (normalizedPos > 0), right speaker gets louder
-        int leftVolume = BASE_VOLUME + static_cast<int>((1.0f - normalizedPos) * (AUDIO_RANGE - BASE_VOLUME));
-        int rightVolume = BASE_VOLUME + static_cast<int>((1.0f + normalizedPos) * (AUDIO_RANGE - BASE_VOLUME));
+        // Calculate distance from center (normalized to [0, 1])
+        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
         
-        // Clamp volumes to valid range
-        leftVolume = std::max(0, std::min(AUDIO_RANGE, leftVolume));
-        rightVolume = std::max(0, std::min(AUDIO_RANGE, rightVolume));
+        // Calculate volume based on distance from center
+        // The farther from center, the louder the volume
+        int maxVolume = AUDIO_RANGE;
+        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
         
-        // Update PWM signals
-        gpioPWM(leftPin, leftVolume);
-        gpioPWM(rightPin, rightVolume);
+        // Set volumes based on which side of center the gap is
+        if (gapCenter < imageCenter) {
+            // Gap is on the left side
+            gpioPWM(leftPin, volume);
+            gpioPWM(rightPin, BASE_VOLUME);
+        } else {
+            // Gap is on the right side
+            gpioPWM(leftPin, BASE_VOLUME);
+            gpioPWM(rightPin, volume);
+        }
     }
 
     void stop() {
