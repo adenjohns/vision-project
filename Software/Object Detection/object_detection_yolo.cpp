@@ -155,8 +155,21 @@ int main(int argc, char** argv)
             str.replace(str.end()-4, str.end(), "_yolo_out_cpp.avi");
             outputFile = str;
         }
-        // Open the webcaom
-        else cap.open(parser.get<int>("device"));
+        // Open the webcam
+        else {
+            int device = parser.get<int>("device");
+            cout << "Attempting to open camera device: " << device << endl;
+            cap.open(device);
+            if (!cap.isOpened()) {
+                cout << "Error: Could not open camera device " << device << endl;
+                return -1;
+            }
+            cout << "Camera opened successfully" << endl;
+            // Set camera properties
+            cap.set(CAP_PROP_FRAME_WIDTH, 640);
+            cap.set(CAP_PROP_FRAME_HEIGHT, 480);
+            cout << "Camera resolution set to: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
+        }
         
     }
     catch(...) {
@@ -182,16 +195,11 @@ int main(int argc, char** argv)
     {
         // get frame from the video
         cap >> frame;
-        cout << "Frame channels: " << frame.channels() << endl; // print channels
-
-
-        // Stop the program if reached end of video
         if (frame.empty()) {
-            cout << "Done processing !!!" << endl;
-            cout << "Output file is stored as " << outputFile << endl;
-            waitKey(3000);
-            break;
+            cout << "Error: Empty frame received from camera" << endl;
+            continue;
         }
+        cout << "Frame size: " << frame.cols << "x" << frame.rows << " channels: " << frame.channels() << endl;
 	    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         // Create a 4D blob from a frame.
         cv::cvtColor(frame, frame, COLOR_BGR2RGB);
