@@ -159,16 +159,24 @@ int main(int argc, char** argv)
         else {
             int device = parser.get<int>("device");
             cout << "Attempting to open camera device: " << device << endl;
-            cap.open(device);
-            if (!cap.isOpened()) {
-                cout << "Error: Could not open camera device " << device << endl;
+            
+            // Try to open the camera with different backends
+            if (!cap.open(device, CAP_V4L2)) {
+                cout << "Error: Could not open camera device " << device << " with V4L2 backend" << endl;
                 return -1;
             }
+            
             cout << "Camera opened successfully" << endl;
+            
             // Set camera properties
             cap.set(CAP_PROP_FRAME_WIDTH, 640);
             cap.set(CAP_PROP_FRAME_HEIGHT, 480);
+            cap.set(CAP_PROP_FPS, 30);
+            cap.set(CAP_PROP_AUTO_EXPOSURE, 1);  // 1 = manual exposure
+            cap.set(CAP_PROP_EXPOSURE, -4);      // Adjust exposure if needed
+            
             cout << "Camera resolution set to: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
+            cout << "Camera FPS: " << cap.get(CAP_PROP_FPS) << endl;
         }
         
     }
