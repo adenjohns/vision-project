@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     while (getline(ifs, line)) classes.push_back(line);
     
     // Give the configuration and weight files for the model
-    String modelConfiguration = "../cfg/yolov3-singleclass-tiny.cfg";
+    String modelConfiguration = "../cfg/yolov3s-tiny.cfg";
     // String modelWeights = "/home/omair/workspace/CNN/hazen.ai/ultralytics/yolov3/weights/latest_retail.weights";
     String modelWeights = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/weights/yolov3-tiny.weights";
 
@@ -155,29 +155,8 @@ int main(int argc, char** argv)
             str.replace(str.end()-4, str.end(), "_yolo_out_cpp.avi");
             outputFile = str;
         }
-        // Open the webcam
-        else {
-            int device = parser.get<int>("device");
-            cout << "Attempting to open camera device: " << device << endl;
-            
-            // Try to open the camera with different backends
-            if (!cap.open(device, CAP_V4L2)) {
-                cout << "Error: Could not open camera device " << device << " with V4L2 backend" << endl;
-                return -1;
-            }
-            
-            cout << "Camera opened successfully" << endl;
-            
-            // Set camera properties
-            cap.set(CAP_PROP_FRAME_WIDTH, 640);
-            cap.set(CAP_PROP_FRAME_HEIGHT, 480);
-            cap.set(CAP_PROP_FPS, 30);
-            cap.set(CAP_PROP_AUTO_EXPOSURE, 1);  // 1 = manual exposure
-            cap.set(CAP_PROP_EXPOSURE, -4);      // Adjust exposure if needed
-            
-            cout << "Camera resolution set to: " << cap.get(CAP_PROP_FRAME_WIDTH) << "x" << cap.get(CAP_PROP_FRAME_HEIGHT) << endl;
-            cout << "Camera FPS: " << cap.get(CAP_PROP_FPS) << endl;
-        }
+        // Open the webcaom
+        else cap.open(parser.get<int>("device"));
         
     }
     catch(...) {
@@ -203,11 +182,16 @@ int main(int argc, char** argv)
     {
         // get frame from the video
         cap >> frame;
+        cout << "Frame channels: " << frame.channels() << endl; // print channels
+
+
+        // Stop the program if reached end of video
         if (frame.empty()) {
-            cout << "Error: Empty frame received from camera" << endl;
-            continue;
+            cout << "Done processing !!!" << endl;
+            cout << "Output file is stored as " << outputFile << endl;
+            waitKey(3000);
+            break;
         }
-        cout << "Frame size: " << frame.cols << "x" << frame.rows << " channels: " << frame.channels() << endl;
 	    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         // Create a 4D blob from a frame.
         cv::cvtColor(frame, frame, COLOR_BGR2RGB);
