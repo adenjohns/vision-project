@@ -117,7 +117,7 @@ int main(int argc, char** argv)
     while (getline(ifs, line)) classes.push_back(line);
     
     // Give the configuration and weight files for the model
-    String modelConfiguration = "../cfg/yolov3s-tiny.cfg";
+    String modelConfiguration = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/cfg/yolov3-tiny.cfg";
     // String modelWeights = "/home/omair/workspace/CNN/hazen.ai/ultralytics/yolov3/weights/latest_retail.weights";
     String modelWeights = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/weights/yolov3-tiny.weights";
 
