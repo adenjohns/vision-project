@@ -2,15 +2,15 @@
 
 ## Overview
 
-This project is a use example based on arducam's depth camera. It includes basic image rendering using opencv, displaying 3D point clouds using PCL, and publishing depth camera data through the ROS2 system.
+This project is a use example based on arducam's depth camera which includes basic image rendering using opencv.
 The depth camera is the depth data obtained by calculating the phase difference based on the transmitted modulated pulse. The resolution of the camera is 240*180. Currently, it has two range modes: 2 meters and 4 meters. The measurement error is within 2 cm.
 The depth camera supports CSI and USB two connection methods, and needs an additional 5V 2A current power supply for the camera.
 
 ## Quick Start
 
-### Clone this repository
+### Clone the entire repository for additional features (not required). 
 
-Clone this repository and enter the directory.
+Clone this repository and enter the directory. The current repository used within this project only has depth processing files in Python and C++. The original has features such as a point cloud function as well as compability with ROS2.
 
 ```shell
   git clone https://github.com/ArduCAM/Arducam_tof_camera.git
@@ -19,7 +19,7 @@ Clone this repository and enter the directory.
 
 ### Install dependencies for Raspberry Pi
 
-> Run in the Arducam_tof_camera folder
+> Run in the Arducam folder
 > Whatever you want to run the C/C++ examples or Python examples, you need to install the dependencies.
 
 ```shell
@@ -38,49 +38,39 @@ Clone this repository and enter the directory.
 
 ###### Python Example
 
-> Run in the example/python folder
+> Run in the Python_Example folder
 
 ```shell
-  cd example/python
+  cd Python_Example
+```
+> Turn on the Python virtual environment
+
+```shell
+  source venv/bin/activate
 ```
 
 ```shell
-  python3 preview_depth.py
+  python3 follow_the_gap.py
   #or
-  python3 capture_raw.py
+  python3 preview_depth.py
 ```
 
-#### C/C++
+#### C++
 
 ##### Compile
 
-> Run in the Arducam_tof_camera folder
+> Run in the Cpp_Example/build folder. If there are any changes within the build file, run both commands, otherwise just skip to the second command. 
 
 ```shell
-  ./compile.sh
+  cmake ..
+```
+```shell
+  make 
 ```
 
 ##### Run
 
-###### C Example
-
-> Run in the build/example/c folder
-
-```shell
-  cd build/example/c
-```
-
-```shell
-  ./preview_depth_c
-```
-
-###### C++ Example
-
-> Run in the build/example/cpp folder
-
-```shell
-  cd build/example/cpp
-```
+> Run in the Cpp_Example/build folder
 
 ```shell
   ./preview_depth
@@ -88,36 +78,15 @@ Clone this repository and enter the directory.
   ./capture_raw
 ```
 
-### Point Cloud Examples
+##### Remove Object and Executable Files
 
-<!-- #### Python -->
-
-#### C/C++
-
-##### Dependencies
-
-```Shell
-  sudo apt update
-  sudo apt-get install libopen3d-dev 
-```
-
-##### Compile
-
-> Run in the Arducam_tof_camera folder
+> Run in the Cpp_Example/build folder. Sometimes the compiler will link or compile files incorrectly and the only way to get a fresh start is to remove all the object and executable files which the following command does (make clean doesn't work for some reason). Removing and rebuilding the build directory also works.
 
 ```shell
-  ./compile_pointcloud.sh
-```
-
-##### Run
-
-> Run in the build/open3d_preview folder
-> If you do not see a point cloud window, please try adding the environment variable `export MESA_GL_VERSION_OVERRIDE=4.5` before running the program.
+  rm -r CMake*
+``` 
+> After clearing out the CMake files run the follow command to remake and link the proper files. 
 
 ```shell
-  cd build/open3d_preview
-```
-
-```shell
-  ./preview_pointcloud
+  cmake ..
 ```

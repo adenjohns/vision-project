@@ -15,8 +15,11 @@
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
 #include <Eigen/Dense>
+#include <vector> 
+#include <algorithm> 
 
-
+// Include the audio feedback header
+#include "audio_feedback.cpp"
 
 // Flag to control IMU program execution
 volatile bool running = true;
@@ -27,6 +30,8 @@ using Eigen::MatrixXd;
 using Eigen::VectorXd;
 using std::cout;
 using std::endl;
+using std::vector;
+using std::sort;
 
 // MAX_DISTANCE value modifiable  is 2 or 4
 #define MAX_DISTANCE 4000
@@ -36,14 +41,12 @@ cv::Rect followRect(0, 0, 0, 0);
 int max_width = 240;
 int max_height = 180;
 int max_range = 0;
-int confidence_value = 30;
+int confidence_value = 60; // original value of 30
 
 void on_confidence_changed(int pos, void *userdata)
 {
     //
 }
-
-
 
 // Function to check if two (IMU) values differ by at least threshold (will use this for termination)
 bool hasChangedBy(float current, float previous, float threshold) {
@@ -55,8 +58,6 @@ void signalHandler(int signum) {
     std::cout << "\nInterrupt signal (" << signum << ") received.\n";
     running = false;
 }
-
-
 
 void display_fps(void)
 {
@@ -143,121 +144,135 @@ void onMouse(int event, int x, int y, int flags, void *param)
     }
 }
 
-/**
- * @brief std::tuple<int, int, int> find_largest_gap(VectorXi data_indices)
- *
- * Finds the largest traversable gap by counting the largest number of consecutive
- * numbers (indices) as well as their starting and ending indeces. The gaps in data_indices occurs from
- * reset_closest_points() which sets the points greater than the threshold to 0, and returns the indices
- * of the rest of the non-zero values in the array.
- *
- * @param data_indices a 1D array of numbers that are the indices of all the furthest data points for the find the gap algorithm.
- * @return max_length, max_start_idx, and max_end_idx.
-        The max length is the length of the widest gap that exists.
-        The max_start_idx is the starting index of the largest gap.
-        The max_end_idx isthe ending index of the largest gap.
- */
-std::tuple<int, int, int> find_largest_gap(VectorXd data_indices)
+struct Gap {
+    int start;                                                                              // the starting value of the gap
+    int end;                                                                                // the ending value of the gap
+    int length() const {return end - start + 1;}                                            // function that returns the length of the gap
+};
+
+bool compareGapLength(const Gap& a, const Gap& b)
 {
-    int max_length = 1;
-    int current_length = 1;
-
-    int start_idx = 0;
-    int max_start_idx = 0;
-    int max_end_idx = 0;
-
-    for (int i = 1; i < data_indices.size(); ++i)
-    {
-        if (data_indices(i) - data_indices(i - 1) == 1)
-        { // Checking for increasing order
-            current_length += 1;
-        }
-        else
-        {
-            if (current_length > max_length)
-            {                                // If current length is greater than max length
-                max_length = current_length; // Set max length to current length
-                max_start_idx = start_idx;
-                max_end_idx = i - 1;
-            }
-
-            current_length = 1; // Reset count
-            start_idx = i;      // Update start index
-        }
-    }
-
-    // Final check of the last value
-    if (current_length > max_length)
-    {
-        max_length = current_length;
-        max_start_idx = start_idx;
-        max_end_idx = data_indices.size() - 1;
-    }
-
-    return std::make_tuple(max_length, max_start_idx, max_end_idx);
+    return a.length() > b.length();                                                         // longer gaps first
 }
 
 /**
- * @brief min_data_rows(MatrixXd array, int row_start, int row_end)
+ * @brief Find largest gap(s). 
  *
- * Sets data great than threshold to zero and returns the indices of all data points larger than zero.
+ * Finds the largest traversable gap by counting the largest number of consecutive
+ * numbers (indices) as well as their starting and ending indices. The gaps in data_indices (breaks in consecutive numbers) occurs from
+ * reset_closest_points() which sets the points greater than the threshold to 0, and returns the indices
+ * of the rest of the non-zero values in the array.
  *
- * @param data The 1D array that needs to be parsed.
- * @param threshold An experimental value that is the limit to how close an object should be distance wise.
- * @return void. 1D array of all the indices of the data points larger than zero.
+ * @param data_indices : A 1D array of numbers that are the indices of all the furthest data points for the find the gap algorithm.
+ * @param topN : The number of gap vectors to record.
+ * @return allGaps : A vector of all the gaps.
+        start : The start of the gaps.
+        end : The end of the gaps. 
+        length : The total length of a gap.
  */
-void reset_closest_points(VectorXd data, int threshold, VectorXd dataIndices)
+std::vector<Gap> find_largest_gaps(VectorXd data_indices, int topN = 2)
+{ 
+    vector<int> data_vec(data_indices.data(), data_indices.data() + data_indices.size());    // copies Eigen vector to normal vector 
+    vector<Gap> allGaps;                                                                     // place to store all the existing gaps
+    
+    int start = data_vec[0];
+    for (int i = 1; i < data_vec.size(); ++i)                                                // iterate through the indices of data 
+    { 
+        if (data_vec[i] != data_vec[i - 1] + 1)                                              // if the current index is not consecutive with the previous one, the gap ended
+        {
+            if (start != data_vec[i - 1])                                                    // if start and previous index are not the same, save the gap
+            {
+                allGaps.push_back({start, data_vec[i - 1]});                                 // creates a gap from the start to just before the current number 
+            }
+            start = data_vec[i];                                                             // start tracking next potential gap
+        }
+    }
+    
+    if (start != data_vec.back())                                                            // Track potential last gap in range
+    {
+        allGaps.push_back({start, data_vec.back()});
+    }
+    
+    sort(allGaps.begin(), allGaps.end(), compareGapLength);                                  // Sorts gaps by length, from laragest to smallest
+    
+    if (allGaps.size() > static_cast<size_t>(topN))                                          // Shrink the vector to keep only the top N largest gaps
+    {
+        allGaps.resize(topN);
+    }
+    
+    return allGaps;
+}
+
+/**
+ * @brief Resets closes points and returns indices of rest. 
+ *
+ * Sets data less than threshold to zero and returns the indices of all data points larger than zero.
+ *
+ * @param data : The 1D array that needs to be parsed.
+ * @param threshold : An experimental value that is the limit to how close an object should be distance wise.
+ * @return void : 1D array of all the indices of the data points larger than zero is copied into dataIndices.
+ */
+void reset_closest_points(VectorXd& data, int threshold, VectorXd& dataIndices)
 {
     int count = 0;
 
     // Iterate through the vector and apply thresholding
     for (int i = 0; i < data.size(); ++i)
     {
-        if (data(i) > threshold)
+        if (data(i) < threshold)
         {
             data(i) = 0; // Set values greater than the threshold to zero
         }
-        else if (data(i) > 0)
+        if (data(i) > 0)
         {
             // Store indices of values that are still nonzero after thresholding
             dataIndices(count++) = i; // Store index
         }
     }
-
-    // Resize output vector to match the actual number of nonzero elements
-    dataIndices.head(count);
 }
 
 /**
- * @brief min_data_rows(MatrixXd array, int row_start, int row_end)
+ * @brief Returns the average distances of select rows per column. 
  *
  * Takes a 2D array and first slices it based on the necessary rows needed given by
- * row_start and row_end, and then finds the min value of all the columns for n rows between the
+ * row_start and row_end, and then finds the average value of all the columns for n rows between the
  * given starting and ending rows.
  *
- * @param array The 2D array of distance data.
- * @param row_start An experimental value of the beginning of the rows that need to be parsed.
- * @param row_end An experimental value of the end of the rows that need to be parsed.
- * @return void. A 1D array of the min distance out of each col between row_start and row_end.
+ * @param array : The 2D array of distance data.
+ * @param row_start : An experimental value of the beginning of the rows that need to be parsed.
+ * @param row_end : An experimental value of the end of the rows that need to be parsed.
+ * @return void : A 1D array of the min distance out of each col between row_start and row_end is copied into col_avg_val.
  */
-void min_data_rows(MatrixXd array, int row_start, int row_end, VectorXd col_max_val)
+void avg_data_rows(MatrixXd array, int row_start, int row_end, int window_size, VectorXd& col_avg_val)
 {
+    int num_rows = row_end - row_start;
+    int num_cols = array.cols();
+    
     // Extract the submatrix (slicing rows from the given start row to the end row)
-    MatrixXd sliced_arr = array.block(row_start, 0, row_end - row_start, array.cols());
-
-    // Compute max along each column
-    col_max_val = sliced_arr.colwise().maxCoeff();
+    MatrixXd sliced_arr = array.block(row_start, 0, num_rows, num_cols);
+    
+    // Compute average along each column    
+    col_avg_val = sliced_arr.colwise().mean();
+    
+    // MOVING AVERAGE IMPLEMENTATION (may be too slow for our needs fps jumped to 17)
+    //// New matrix to store values of averages 
+    //MatrixXd smoothed = MatrixXd::Zero(num_rows - window_size + 1, num_cols); 
+    //for (int i = 0; i <= num_rows - window_size; ++i){
+        //smoothed.row(i) = sliced_arr.block(i, 0, window_size, num_cols).colwise().mean();
+    //}
+    //// Compute average along each column    
+    //col_avg_val = smoothed.colwise().mean();
 }
 
 /**
- * @brief MatrixXf convertMatToEigen(cv::Mat depth_mat)
+ * @brief Convert to an Eigen matrix.
  *
  * Converts the depth matrix to the Eigen matrix.
  *
  * @param depth_mat OpenCv's 2D depth data.
- * @return void. A 2D array of depth data converted to an Eigen matrix.
+ * @return void. A 2D matrix of depth data converted to an Eigen matrix.
  */
-void convertMatToEigen(cv::Mat depth_mat, MatrixXd depth_matrix)
+void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 {
     for (int i = 0; i < depth_mat.rows; ++i)
     {
@@ -270,6 +285,17 @@ void convertMatToEigen(cv::Mat depth_mat, MatrixXd depth_matrix)
 
 int main()
 {
+    // Initialize audio feedback
+    AudioFeedback audio;
+    if (!audio.initialize()) {
+        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        return -1;
+    }
+    
+    // ###########################################################################################################
+    // IMU SETUP 
+    // ###########################################################################################################
+    
     // Register signal handler
     signal(SIGINT, signalHandler);
     std::cout << "Activating BNO055 Sensor using pigpio\n";
@@ -318,11 +344,15 @@ int main()
     std::chrono::steady_clock::time_point lastMotionTime;
     const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
     const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
+    
+    // ###########################################################################################################
+    // IMU SETUP END
+    // ###########################################################################################################
 
 
-
-
-
+    // ###########################################################################################################
+    // ARDUCAM SETUP 
+    // ###########################################################################################################
 
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
@@ -346,6 +376,10 @@ int main()
     uint8_t *preview_ptr = new uint8_t[info.width * info.height * 2];
     cv::namedWindow("preview", cv::WINDOW_AUTOSIZE);
     cv::setMouseCallback("preview", onMouse);
+    
+    // ###########################################################################################################
+    // ARDUCAM SETUP END
+    // ###########################################################################################################
 
     while (running)
     {
@@ -436,7 +470,7 @@ int main()
             continue;
         }
         frame->getFormat(FrameType::DEPTH_FRAME, format);
-        std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
+        // std::cout << "frame: (" << format.width << "x" << format.height << ")" << std::endl;
         max_height = format.height;
         max_width = format.width;
 
@@ -463,42 +497,56 @@ int main()
         cv::rectangle(result_frame, seletRect, cv::Scalar(0, 0, 0), 2);
         cv::rectangle(result_frame, followRect, cv::Scalar(255, 255, 255), 1);
 
-        std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
+        // std::cout << "select Rect distance: " << cv::mean(depth_frame(seletRect)).val[0] << std::endl;
 
         cv::imshow("preview", result_frame);
-
+        
         // #######################################################################################
-        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols); // Matrix output for convertMatToEigen(). A 2D array of depth data converted to an Eigen matrix.
+        // PATH PLANNING CODE
+        // #######################################################################################
+        
+        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols);                      
         convertMatToEigen(depth_frame, depth_matrix);
 
-        int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
-        int base_row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
-        int base_row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+        int threshold = 2999; 
+        int base_row_start = 60;   
+        int base_row_end = 120;    
+        int window_size = 5;
 
-        // So if the user tilts their head upward, headTiltDeg offset becomes more negative
-        // and shifts the region downward on the depth image, objects of interest move lower in the frame
-        // Conversely, a downward tilt (positive headTiltDeg) will shift the ROI upward
-        // Tracks objects at the same physical leel that the user is looking at, regardless of head tilt
-        // Compute dynamic offset
-        double scale_factor = 0.5; // pixels per degree, adjust scale_factor to control sensitivity
+        double scale_factor = 0.5;
         int offset = static_cast<int>(scale_factor * headTiltDeg);
         
-        // Adjust the region, clamp to the image boundaries
         int row_start = std::max(0, base_row_start + offset);
         int row_end = std::min(max_height - 1, base_row_end + offset);
 
-        VectorXd col_max_val(depth_matrix.cols()); // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
-        min_data_rows(depth_matrix, row_start, row_end, col_max_val);
+        VectorXd col_max_val(depth_matrix.cols());                                     
+        avg_data_rows(depth_matrix, row_start, row_end, window_size, col_max_val);
 
-        VectorXd data_indices(col_max_val.size()); // Vector output for reset_closet_points(). 1D array of all the indices of the data points larger than zero.
+        VectorXd data_indices(col_max_val.size());                                     
         reset_closest_points(col_max_val, threshold, data_indices);
 
-        auto [max_length, max_start_idx, max_end_idx] = find_largest_gap(data_indices);
+        auto gaps = find_largest_gaps(data_indices, 2);
+        
+        // Update audio feedback based on the gaps
+        audio.updateAudio(gaps, format.width);
+        
+        if (gaps.empty()) 
+        { 
+            cout << "No gaps found.\n"; 
+        }
+        else 
+        {
+            cout << "Gaps: ";
+            for (size_t i = 0; i < gaps.size(); ++i) 
+            {
+                cout << "[Gap " << i + 1 
+                     << " -> Start: " << gaps[i].start << " End: " << gaps[i].end << ""
+                     << ", Len: " << gaps[i].length() << "] ";
+            }
+            cout << "\n";
+        }
 
-        cout << "Max Length: " << max_length << endl;
-        cout << "Max Start Index: " << max_start_idx << endl;
-        cout << "Max End Index: " << max_end_idx << endl;
-
+        // #######################################################################################
         // #######################################################################################
 
         auto key = cv::waitKey(1);
@@ -514,6 +562,7 @@ int main()
         tof.releaseFrame(frame);
     }
 
+    // Clean up
     if (tof.stop())
     {
         return -1;
@@ -523,7 +572,10 @@ int main()
     {
         return -1;
     }
+    
+    // Stop audio feedback
+    audio.stop();
+    
     std::cout << "\nExiting...\n"; 
     return 0;
-
 }
