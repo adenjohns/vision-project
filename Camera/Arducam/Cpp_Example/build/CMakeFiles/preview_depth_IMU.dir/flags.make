@@ -4,7 +4,7 @@
 # compile CXX with /usr/bin/c++
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/usr/include/eigen3 -isystem /usr/include/opencv4
+CXX_INCLUDES = -I/usr/include/eigen3 -I/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/include -isystem /usr/include/opencv4
 
 CXX_FLAGS = 
 

@@ -434,8 +434,8 @@ int main()
         std::cout << "Z=" << std::fixed << std::setprecision(2) << euler.z() << "°";
         
         // Get temp (idk if we need this but just in case)
-        int8_t temp = bno.getTemp();
-        std::cout << " | Temp=" << (int)temp << "°C";
+        // int8_t temp = bno.getTemp();
+        // std::cout << " | Temp=" << (int)temp << "°C";
         
         // Head Tilt Calculation:
         // With the sensor mounted so that the z-axis points upward (toward the sky)

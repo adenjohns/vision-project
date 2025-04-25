@@ -69,44 +69,44 @@ include CMakeFiles/preview_depth_IMU.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/preview_depth_IMU.dir/flags.make
 
-CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o: CMakeFiles/preview_depth_IMU.dir/flags.make
-CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth_IMU.cpp
-CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o: CMakeFiles/preview_depth_IMU.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o -MF CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o.d -o CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth_IMU.cpp
+CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o: CMakeFiles/preview_depth_IMU.dir/flags.make
+CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
+CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o: CMakeFiles/preview_depth_IMU.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o -MF CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o.d -o CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
 
-CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth_IMU.cpp > CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.i
+CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp > CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.i
 
-CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth_IMU.cpp -o CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.s
+CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp -o CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.s
 
-CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o: CMakeFiles/preview_depth_IMU.dir/flags.make
-CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/RPI_BNO055.cpp
-CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o: CMakeFiles/preview_depth_IMU.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o -MF CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o.d -o CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/RPI_BNO055.cpp
+CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o: CMakeFiles/preview_depth_IMU.dir/flags.make
+CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o: /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/RPI_BNO055.cpp
+CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o: CMakeFiles/preview_depth_IMU.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o -MF CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o.d -o CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o -c /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/RPI_BNO055.cpp
 
-CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/RPI_BNO055.cpp > CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.i
+CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/RPI_BNO055.cpp > CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.i
 
-CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/RPI_BNO055.cpp -o CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.s
+CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/RPI_BNO055.cpp -o CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.s
 
 # Object files for target preview_depth_IMU
 preview_depth_IMU_OBJECTS = \
-"CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o" \
-"CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o"
+"CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o" \
+"CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o"
 
 # External object files for target preview_depth_IMU
 preview_depth_IMU_EXTERNAL_OBJECTS =
 
-preview_depth_IMU: CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o
-preview_depth_IMU: CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o
+preview_depth_IMU: CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o
+preview_depth_IMU: CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o
 preview_depth_IMU: CMakeFiles/preview_depth_IMU.dir/build.make
 preview_depth_IMU: /usr/lib/libArducamDepthCamera.so
 preview_depth_IMU: /usr/lib/aarch64-linux-gnu/libopencv_stitching.so.4.6.0
