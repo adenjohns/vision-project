@@ -17,6 +17,8 @@
 #include <Eigen/Dense>
 #include <vector> 
 #include <algorithm> 
+#include <thread>
+
 
 // Flag to control IMU program execution
 volatile bool running = true;
@@ -282,6 +284,12 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 
 int main()
 {
+    // Initialize audio feedback
+    AudioFeedback audio;
+    if (!audio.initialize()) {
+        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        return -1;
+    }
     
     // ###########################################################################################################
     // IMU SETUP 
@@ -339,7 +347,113 @@ int main()
     // ###########################################################################################################
     // IMU SETUP END
     // ###########################################################################################################
+    
+    // ###########################################################################################################
+    // AUDIO FEEDBACK START
+    // ###########################################################################################################
 
+// Audio parameters
+const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
+const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
+const int AUDIO_FREQ = 1000;    // Base frequency in Hz
+const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
+const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
+
+
+class AudioFeedback {
+private:
+    int leftPin;
+    int rightPin;
+    bool initialized;
+
+public:
+    AudioFeedback(int leftPin = AUDIO_PIN_LEFT, int rightPin = AUDIO_PIN_RIGHT)
+        : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
+
+    bool initialize() {
+        if (gpioInitialise() < 0) {
+            std::cerr << "Failed to initialize pigpio" << std::endl;
+            return false;
+        }
+
+        // Set pins as output
+        gpioSetMode(leftPin, PI_OUTPUT);
+        gpioSetMode(rightPin, PI_OUTPUT);
+
+        // Set PWM frequency
+        gpioSetPWMfrequency(leftPin, AUDIO_FREQ);
+        gpioSetPWMfrequency(rightPin, AUDIO_FREQ);
+
+        // Set PWM range
+        gpioSetPWMrange(leftPin, AUDIO_RANGE);
+        gpioSetPWMrange(rightPin, AUDIO_RANGE);
+
+        initialized = true;
+        return true;
+    }
+
+    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
+        if (!initialized) {
+            std::cerr << "AudioFeedback not initialized" << std::endl;
+            return;
+        }
+
+        // If no gaps found, play base volume on both speakers
+        if (gaps.empty()) {
+            gpioPWM(leftPin, BASE_VOLUME);
+            gpioPWM(rightPin, BASE_VOLUME);
+            return;
+        }
+
+        // Find the largest gap (most likely path)
+        const Gap& mainGap = gaps[0];
+        
+        // Calculate the center of the gap
+        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
+        
+        // Calculate the center of the image
+        float imageCenter = imageWidth / 2.0f;
+        
+        // Calculate distance from center (normalized to [0, 1])
+        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
+        
+        // Calculate volume based on distance from center
+        // The farther from center, the louder the volume
+        int maxVolume = AUDIO_RANGE;
+        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
+        
+        // Set volumes based on which side of center the gap is
+        if (gapCenter < imageCenter) {
+            // Gap is on the left side
+            gpioPWM(leftPin, volume);
+            gpioPWM(rightPin, BASE_VOLUME);
+        } else {
+            // Gap is on the right side
+            gpioPWM(leftPin, BASE_VOLUME);
+            gpioPWM(rightPin, volume);
+        }
+    }
+
+    void stop() {
+        if (initialized) {
+            gpioPWM(leftPin, 0);
+            gpioPWM(rightPin, 0);
+            gpioTerminate();
+            initialized = false;
+        }
+    }
+
+    ~AudioFeedback() {
+        stop();
+    }
+};
+
+
+
+    
+    // ###########################################################################################################
+    // AUDIO FEEDBACK END
+    // ###########################################################################################################
 
     // ###########################################################################################################
     // ARDUCAM SETUP 
@@ -434,8 +548,8 @@ int main()
         std::cout << "Z=" << std::fixed << std::setprecision(2) << euler.z() << "°";
         
         // Get temp (idk if we need this but just in case)
-        int8_t temp = bno.getTemp();
-        std::cout << " | Temp=" << (int)temp << "°C";
+        // int8_t temp = bno.getTemp();
+        // std::cout << " | Temp=" << (int)temp << "°C";
         
         // Head Tilt Calculation:
         // With the sensor mounted so that the z-axis points upward (toward the sky)
@@ -496,33 +610,30 @@ int main()
         // PATH PLANNING CODE
         // #######################################################################################
         
-        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols);                      // Matrix output for convertMatToEigen(). A 2D array of depth data converted to an Eigen matrix.
+        MatrixXd depth_matrix(depth_frame.rows, depth_frame.cols);                      
         convertMatToEigen(depth_frame, depth_matrix);
 
-        int threshold = 2999; // EXPERIMENTAL VALUE, depth values of object at closest limit to user
-        int base_row_start = 60;   // EXPERIMANTAL VALUE, depth value to first row from frame to parse
-        int base_row_end = 120;    // EXPERIMENTAL VALUE, depth value of last row from frame to parse
+        int threshold = 2999; 
+        int base_row_start = 60;   
+        int base_row_end = 120;    
         int window_size = 5;
 
-        // So if the user tilts their head upward, headTiltDeg offset becomes more negative
-        // and shifts the region downward on the depth image, objects of interest move lower in the frame
-        // Conversely, a downward tilt (positive headTiltDeg) will shift the ROI upward
-        // Tracks objects at the same physical leel that the user is looking at, regardless of head tilt
-        // Compute dynamic offset
-        double scale_factor = 0.5; // pixels per degree, adjust scale_factor to control sensitivity
+        double scale_factor = 0.5;
         int offset = static_cast<int>(scale_factor * headTiltDeg);
         
-        // Adjust the region, clamp to the image boundaries
         int row_start = std::max(0, base_row_start + offset);
         int row_end = std::min(max_height - 1, base_row_end + offset);
 
-        VectorXd col_max_val(depth_matrix.cols());                                     // Vector output for min_data_rows(). A 1D array of the min distance out of each col between row_start and row_end.
+        VectorXd col_max_val(depth_matrix.cols());                                     
         avg_data_rows(depth_matrix, row_start, row_end, window_size, col_max_val);
 
-        VectorXd data_indices(col_max_val.size());                                     // Vector output for reset_closet_points(). 1D array of all the indices of the data points larger than zero.
+        VectorXd data_indices(col_max_val.size());                                     
         reset_closest_points(col_max_val, threshold, data_indices);
 
         auto gaps = find_largest_gaps(data_indices, 2);
+        
+        // Update audio feedback based on the gaps
+        audio.updateAudio(gaps, format.width);
         
         if (gaps.empty()) 
         { 
@@ -556,6 +667,7 @@ int main()
         tof.releaseFrame(frame);
     }
 
+    // Clean up
     if (tof.stop())
     {
         return -1;
@@ -565,7 +677,10 @@ int main()
     {
         return -1;
     }
+    
+    // Stop audio feedback
+    audio.stop();
+    
     std::cout << "\nExiting...\n"; 
     return 0;
-
 }
