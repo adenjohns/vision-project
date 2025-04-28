@@ -8,8 +8,8 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/RPI_BNO055.cpp" "CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o" "gcc" "CMakeFiles/preview_depth_IMU.dir/RPI_BNO055.cpp.o.d"
-  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/preview_depth_IMU.cpp" "CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o" "gcc" "CMakeFiles/preview_depth_IMU.dir/preview_depth_IMU.cpp.o.d"
+  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/RPI_BNO055.cpp" "CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o" "gcc" "CMakeFiles/preview_depth_IMU.dir/src/RPI_BNO055.cpp.o.d"
+  "/home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp" "CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o" "gcc" "CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o.d"
   )
 
 # Targets to which this target links.
