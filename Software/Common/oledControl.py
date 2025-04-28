@@ -1,59 +1,86 @@
 # SPDX-FileCopyrightText: 2017 Tony DiCola for Adafruit Industries
 # SPDX-FileCopyrightText: 2017 James DeVito for Adafruit Industries
 # SPDX-License-Identifier: MIT
+import os
+import time
+import warnings
 
-# SPDX-License-Identifier: MIT
-import time, board, busio, warnings
+import board
+import busio
 from PIL import Image, ImageDraw, ImageFont
+
 import adafruit_ssd1306
 from adafruit_lc709203f import LC709203F
 from adafruit_extended_bus import ExtendedI2C as I2C
 
-# (A) Silence the irrelevant warning
-warnings.filterwarnings("ignore", category=RuntimeWarning,
-                        message="I2C frequency is not settable*")
+# ──────────────────────────────────────────────────────────────────────────────
+# (A) Silence the irrelevant warning shown on Raspberry Pi when bit‑banging I²C
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    message="I2C frequency is not settable*",
+)
 
-# (B) OLED on the hardware bus /dev/i2c-1 (GPIO 2/3)
+# (B) OLED on the hardware I²C bus /dev/i2c‑1 (GPIO 2/3)
 i2c_oled = busio.I2C(board.SCL, board.SDA)
 disp = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c_oled)
 
-# (C) Battery gauge on the bit-banged bus /dev/i2c-3 (GPIO 22/23)
-i2c_batt = I2C(3)     # freq=None suppresses the warning too
-sensor   = LC709203F(i2c_batt)
+# (C) Battery gauge on the bit‑banged bus /dev/i2c‑3 (GPIO 22/23)
+i2c_batt = I2C(3)
+sensor = LC709203F(i2c_batt)
 
-# Clear display.
-disp.fill(0)
-disp.show()
+# ──────────────────────────────────────────────────────────────────────────────
+# Display & drawing setup
+width, height = disp.width, disp.height
+image = Image.new("1", (width, height))  # 1‑bit image for SSD1306
+canvas = ImageDraw.Draw(image)
+font = ImageFont.load_default()
 
-# Prepare drawing surface
-width  = disp.width
-height = disp.height
-image  = Image.new("1", (width, height))
-draw   = ImageDraw.Draw(image)
-font   = ImageFont.load_default()
+# ──────────────────────────────────────────────────────────────────────────────
+# Load & preprocess the Team Vision logo once at start‑up
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "Team_Vision", "logo.png")
+try:
+    _logo_original = Image.open(LOGO_PATH).convert("1")
+except FileNotFoundError:
+    _logo_original = None  # Continue without logo if missing
 
+if _logo_original is not None:
+    # Down‑scale (maintaining aspect ratio) so the logo height ≤ display height
+    if _logo_original.height > height:
+        scale = height / float(_logo_original.height)
+        new_size = (int(_logo_original.width * scale), height)
+        _logo_original = _logo_original.resize(new_size, Image.LANCZOS).convert("1")
+    logo = _logo_original
+else:
+    logo = None
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Main loop
 padding = -2
-top     = padding
+text_top = padding
 
 while True:
-    # clear buffer
-    draw.rectangle((0, 0, width, height), outline=0, fill=0)
+    # Clear frame‑buffer
+    canvas.rectangle((0, 0, width, height), outline=0, fill=0)
 
-    # read battery
-    voltage = sensor.cell_voltage
-    percent = sensor.cell_percent
+    # Read battery information
+    voltage = sensor.cell_voltage        # V
+    percent = sensor.cell_percent        # %
+    temperature = sensor.cell_temperature  # °C
 
-    # format text
-    voltage_text   = f"Voltage: {voltage:0.3f} V"
-    percent_text   = f"Charge:  {percent:3.0f}%"
+    sensor.thermistor_bconstant = 3950
+    sensor.thermistor_enable = True
 
-    # draw text
-    draw.text((0, top + 0),  voltage_text, font=font, fill=255)
-    draw.text((0, top + 8),  percent_text, font=font, fill=255)
-    # optional: show bits
-    # draw.text((0, top + 16), "Bits: " + "".join(str(x) for x in b), font=font, fill=255)
+    # Render text
+    canvas.text((0, text_top + 0), f"Voltage: {voltage:0.3f} V", font=font, fill=255)
+    canvas.text((0, text_top + 8), f"Charge: {percent:0.1f}%", font=font, fill=255)
+    canvas.text((0, text_top + 16), f"Temp: {temperature:0.2f} °C", font=font, fill=255)
 
-    # send buffer to the display
+    # Paste logo (if available) in the top‑right corner **after** drawing text
+    if logo is not None:
+        image.paste(logo, (width - logo.width, 0))  # No mask needed – already 1‑bit
+
+    # Push frame‑buffer to the OLED
     disp.image(image)
     disp.show()
     time.sleep(0.1)
