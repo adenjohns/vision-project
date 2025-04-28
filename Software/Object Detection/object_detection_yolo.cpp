@@ -25,18 +25,15 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.3; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
-<<<<<<< HEAD
 int inpWidth = 320; // 416;  // Width of network's input image
 int inpHeight = 240; // 416; // Height of network's input image
 int frameSkip = 2;
 int frameCounter = 0;
-=======
 int inpWidth = 160;  // Reduced from 320 to 160 for faster processing
 int inpHeight = 120; // Reduced from 240 to 120 for faster processing
 int frameSkip = 3;   // Process every 3rd frame (increased from 2)
 int frameCounter = 0;
 bool skipFrame = false;
->>>>>>> adding timing and bottleneck identification code
 vector<string> classes;
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
@@ -192,29 +189,6 @@ int main(int argc, char** argv)
     {
         // get frame from the video
         cap >> frame;
-<<<<<<< HEAD
-        cout << "Frame channels: " << frame.channels() << endl; // print channels
-        // Skip frames based on frameSkip value
-        frameCounter++;
-        if (frameCounter % frameSkip != 0) {
-            continue;
-        }
-
-        // Stop the program if reached end of video
-        if (frame.empty()) {
-            cout << "Done processing !!!" << endl;
-            cout << "Output file is stored as " << outputFile << endl;
-            waitKey(3000);
-            break;
-        }
-        
-        // timing for frame processing
-        auto start = high_resolution_clock::now();
-        
-	    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-        // Create a 4D blob from a frame.
-        cv::cvtColor(frame, frame, COLOR_BGR2RGB);
-=======
         
         // Skip frames more efficiently
         frameCounter++;
@@ -225,7 +199,6 @@ int main(int argc, char** argv)
             imshow(kWinName, frame);
             continue;
         }
->>>>>>> adding timing and bottleneck identification code
 
         if (frame.empty()) {
             cout << "Done processing !!!" << endl;
@@ -248,22 +221,17 @@ int main(int argc, char** argv)
         // Set input and run forward pass
         net.setInput(blob);
         
-<<<<<<< HEAD
         // Run inference
         auto forward_start = high_resolution_clock::now();
         
-        // Runs the forward pass to get output of the output layers
-=======
         // Time the forward pass
         auto forward_start = high_resolution_clock::now();
->>>>>>> adding timing and bottleneck identification code
         vector<Mat> outs;
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
         // Remove the bounding boxes with low confidence
         postprocess(frame, oldframe, outs);
-<<<<<<< HEAD
         auto end = high_resolution_clock::now(); // end timing
 	    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         
@@ -284,10 +252,6 @@ int main(int argc, char** argv)
         double t = net.getPerfProfile(layersTimes) / freq;
         string label2 = format("Inference time for a frame : %.2f ms", t);
         putText(frame, label2, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-        // double duration = std::chrono::duration_cast<microseconds>( t2 - t1 ).count();
-        // alltimes += duration;
-        // count +=1;
-=======
         
         // End timing for frame processing
         auto end = high_resolution_clock::now();
@@ -308,7 +272,6 @@ int main(int argc, char** argv)
                             1000000.0/total_duration,
                             frameSkip);
         putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
->>>>>>> adding timing and bottleneck identification code
 
         // Write the frame with the detection boxes
         Mat detectedFrame;
