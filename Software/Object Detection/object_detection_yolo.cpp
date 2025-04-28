@@ -23,12 +23,20 @@ using namespace std;
 using namespace std::chrono;
 
 // Initialize the parameters
-float confThreshold = 0.3; // 0.5; // Confidence threshold
+float confThreshold = 0.3; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
+<<<<<<< HEAD
 int inpWidth = 320; // 416;  // Width of network's input image
 int inpHeight = 240; // 416; // Height of network's input image
 int frameSkip = 2;
 int frameCounter = 0;
+=======
+int inpWidth = 160;  // Reduced from 320 to 160 for faster processing
+int inpHeight = 120; // Reduced from 240 to 120 for faster processing
+int frameSkip = 3;   // Process every 3rd frame (increased from 2)
+int frameCounter = 0;
+bool skipFrame = false;
+>>>>>>> adding timing and bottleneck identification code
 vector<string> classes;
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
@@ -123,7 +131,7 @@ int main(int argc, char** argv)
     // String modelWeights = "/home/omair/workspace/CNN/hazen.ai/ultralytics/yolov3/weights/latest_retail.weights";
     String modelWeights = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/weights/yolov3-tiny.weights";
 
-    // Load the network
+    // Load the network with optimized settings
     Net net = readNetFromDarknet(modelConfiguration, modelWeights);
     net.setPreferableBackend(DNN_BACKEND_OPENCV);
     net.setPreferableTarget(DNN_TARGET_CPU);
@@ -184,6 +192,7 @@ int main(int argc, char** argv)
     {
         // get frame from the video
         cap >> frame;
+<<<<<<< HEAD
         cout << "Frame channels: " << frame.channels() << endl; // print channels
         // Skip frames based on frameSkip value
         frameCounter++;
@@ -205,39 +214,56 @@ int main(int argc, char** argv)
 	    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         // Create a 4D blob from a frame.
         cv::cvtColor(frame, frame, COLOR_BGR2RGB);
+=======
+        
+        // Skip frames more efficiently
+        frameCounter++;
+        skipFrame = (frameCounter % frameSkip != 0);
+        
+        if (skipFrame) {
+            // Just display the frame without processing
+            imshow(kWinName, frame);
+            continue;
+        }
+>>>>>>> adding timing and bottleneck identification code
 
-        // cout<<"Before = "<< frame.size<< " " << frame.cols << " " << frame.rows<< endl;
+        if (frame.empty()) {
+            cout << "Done processing !!!" << endl;
+            cout << "Output file is stored as " << outputFile << endl;
+            waitKey(3000);
+            break;
+        }
+
+        // Start timing for frame processing
+        auto start = high_resolution_clock::now();
+
+        // Create a 4D blob from a frame with reduced size
+        cv::cvtColor(frame, frame, COLOR_BGR2RGB);
         oldframe = frame.clone();
-        sz = letterbox(frame, 416);
-        cout<<"After = "<< sz.width << " " << sz.height << endl;
-        cout<<frame.cols << " " << frame.rows << endl;
+        sz = letterbox(frame, inpWidth);  // Use reduced input size
         
-        // blobFromImage(frame, blob, 1/255.0, Size(inpWidth, inpHeight), Scalar(0,0,0), true, false);
-        // blobFromImage(frame, blob, 1/255.0, Size(frame.rows, frame.cols), Scalar(0,0,0), true, false);
+        // Create blob with reduced size
         blobFromImage(frame, blob, 1/255.0, Size(inpWidth, sz.height), Scalar(0,0,0), true, false);
-        // if (frame.channels() == 1) {
-        //     cv::cvtColor(frame, frame, COLOR_GRAY2BGR);
-        // }
-
-        // cv::FileStorage file("some_name.txt", cv::FileStorage::WRITE);
-
-        // Write to file!
-        // file << "matName" << blob;
-        // cout<<blob.size()<<endl;
         
-        //Sets the input to the network
+        // Set input and run forward pass
         net.setInput(blob);
         
+<<<<<<< HEAD
         // Run inference
         auto forward_start = high_resolution_clock::now();
         
         // Runs the forward pass to get output of the output layers
+=======
+        // Time the forward pass
+        auto forward_start = high_resolution_clock::now();
+>>>>>>> adding timing and bottleneck identification code
         vector<Mat> outs;
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
         // Remove the bounding boxes with low confidence
         postprocess(frame, oldframe, outs);
+<<<<<<< HEAD
         auto end = high_resolution_clock::now(); // end timing
 	    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         
@@ -261,21 +287,45 @@ int main(int argc, char** argv)
         // double duration = std::chrono::duration_cast<microseconds>( t2 - t1 ).count();
         // alltimes += duration;
         // count +=1;
+=======
+        
+        // End timing for frame processing
+        auto end = high_resolution_clock::now();
+        
+        // Calculate and display timing information
+        auto total_duration = duration_cast<microseconds>(end - start).count();
+        auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
+        
+        // Only update timing stats for processed frames
+        if (!skipFrame) {
+            alltimes += total_duration;
+            count += 1;
+        }
+        
+        string label = format("Total time: %.2f ms, Forward pass: %.2f ms, FPS: %.2f, Frame skip: %d", 
+                            total_duration/1000.0, 
+                            forward_duration/1000.0,
+                            1000000.0/total_duration,
+                            frameSkip);
+        putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+>>>>>>> adding timing and bottleneck identification code
 
-        std::cout<< label << " chrono time  = " << duration/1000.0<<std::endl;
-            
         // Write the frame with the detection boxes
         Mat detectedFrame;
         frame.convertTo(detectedFrame, CV_8U);
-        cv::cvtColor(detectedFrame,detectedFrame, COLOR_RGB2BGR);
+        cv::cvtColor(detectedFrame, detectedFrame, COLOR_RGB2BGR);
         if (parser.has("image")) imwrite(outputFile, detectedFrame);
-        else video.write(detectedFrame);
+        else if (!skipFrame) video.write(detectedFrame);  // Only write processed frames
         
         imshow(kWinName, frame);
-        
     }
-    cout<<" MEAN TIME PER FRAME = " << double((alltimes/count)/1000.0) << std::endl;
-    cout<<" TIME PER VIDEO = " << double(alltimes/1000.0) << std::endl;
+    
+    // Calculate and display final statistics
+    double mean_time = (alltimes/count)/1000.0;
+    double effective_fps = 1000.0/mean_time;
+    cout << "MEAN TIME PER PROCESSED FRAME = " << mean_time << " ms" << endl;
+    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/frameSkip << endl;
+    cout << "TIME PER VIDEO = " << double(alltimes/1000.0) << " ms" << endl;
     
     cap.release();
     if (!parser.has("image")) video.release();
