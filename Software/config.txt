@@ -1,0 +1,27 @@
+
+# ---------------- OPTIONAL INTERFACES -----------------
+dtparam=i2c_arm=on            # keeps /dev/i2c-1 alive for the OLED
+dtparam=spi=on
+dtparam=audio=on
+
+# ---------------- 2-D DISPLAY & OTHER STUFF -----------
+dtoverlay=vc4-kms-v3d
+max_framebuffers=2
+disable_fw_kms_setup=1
+arm_64bit=1
+disable_overscan=1
+arm_boost=1
+
+# ---------------- SECOND HARDWARE I²C -----------------
+# Enable the BSC-3 controller on its default pins:
+dtoverlay=i2c-gpio,bus=3,i2c_gpio_sda=22,i2c_gpio_scl=23,i2c_gpio_delay_us=2
+s
+
+dtoverlay=i2c-gpio,bus=2,i2c_gpio_sda=0,i2c_gpio_scl=1
+# ---------------- UART / BT OPTIONS -------------------
+dtoverlay=disable-bt           # leave this if you need the UART pins free
+enable_uart=1
+dtoverlay=i2c-gpio,bus=1,i2c_gpio_sda=02,i2c_gpio_scl=03
+dtoverlay=arducam-pivariety
+camera_auto_detect=0
+
