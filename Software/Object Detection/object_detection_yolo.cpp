@@ -27,9 +27,9 @@ float confThreshold = 0.3; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
 // int inpWidth = 320; // 416;  // Width of network's input image
 // int inpHeight = 240; // 416; // Height of network's input image
-int inpWidth = 160;  // Reduced from 320 to 160 for faster processing
-int inpHeight = 120; // Reduced from 240 to 120 for faster processing
-int frameSkip = 3;   // Process every 3rd frame (increased from 2)
+int inpWidth = 128;  // Reduced from 320 to 160 for faster processing
+int inpHeight = 96; // Reduced from 240 to 120 for faster processing
+int frameSkip = 4;   // Process every 3rd frame (increased from 2)
 int frameCounter = 0;
 bool skipFrame = false;
 vector<string> classes;
@@ -218,51 +218,68 @@ int main(int argc, char** argv)
         
         // Set input and run forward pass
         net.setInput(blob);
-
         
         // Time the forward pass
         auto forward_start = high_resolution_clock::now();
-        vector<Mat> outs; // Run Inference
+        vector<Mat> outs;
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
         // Remove the bounding boxes with low confidence
         postprocess(frame, oldframe, outs);
-        auto end = high_resolution_clock::now(); // end timing
-	    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         
-        // Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
+        // End timing for frame processing
+        auto end = high_resolution_clock::now();
+        
+        // Calculate timing information
         auto total_duration = duration_cast<microseconds>(end - start).count();
         auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
-        double duration = std::chrono::duration_cast<microseconds>( end - start ).count();
-        alltimes += duration;
-        count+=1;
         
+        // Get network performance profile
         vector<double> layersTimes;
         double freq = getTickFrequency() / 1000;
         double t = net.getPerfProfile(layersTimes) / freq;
-        string label2 = format("Inference time for a frame : %.2f ms", t);
-        putText(frame, label2, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
         
-        // Only update timing stats for processed frames
+        // Update statistics
         if (!skipFrame) {
             alltimes += total_duration;
             count += 1;
         }
         
-        string label = format("Total time: %.2f ms, Forward pass: %.2f ms, FPS: %.2f, Frame skip: %d", 
-                            total_duration/1000.0, 
-                            forward_duration/1000.0,
-                            1000000.0/total_duration,
-                            frameSkip);
-        putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-
+        // Display timing information
+        string label = format(
+            "Frame %d:\n"
+            "Total: %.1f ms\n"
+            "Forward: %.1f ms\n"
+            "Network: %.1f ms\n"
+            "FPS: %.1f\n"
+            "Skip: %d",
+            frameCounter,
+            total_duration/1000.0,
+            forward_duration/1000.0,
+            t,
+            1000000.0/total_duration,
+            frameSkip
+        );
+        
+        // Print to console
+        cout << "\r" << label << flush;
+        
+        // Display on frame
+        int y = 15;
+        std::stringstream ss(label);
+        std::string line;
+        while (std::getline(ss, line)) {
+            putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+            y += 20;
+        }
+        
         // Write the frame with the detection boxes
         Mat detectedFrame;
         frame.convertTo(detectedFrame, CV_8U);
         cv::cvtColor(detectedFrame, detectedFrame, COLOR_RGB2BGR);
         if (parser.has("image")) imwrite(outputFile, detectedFrame);
-        else if (!skipFrame) video.write(detectedFrame);  // Only write processed frames
+        else if (!skipFrame) video.write(detectedFrame);
         
         imshow(kWinName, frame);
     }
@@ -270,9 +287,10 @@ int main(int argc, char** argv)
     // Calculate and display final statistics
     double mean_time = (alltimes/count)/1000.0;
     double effective_fps = 1000.0/mean_time;
+    cout << "\n\nFinal Statistics:" << endl;
     cout << "MEAN TIME PER PROCESSED FRAME = " << mean_time << " ms" << endl;
     cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/frameSkip << endl;
-    cout << "TIME PER VIDEO = " << double(alltimes/1000.0) << " ms" << endl;
+    cout << "TOTAL PROCESSED FRAMES = " << count << endl;
     
     cap.release();
     if (!parser.has("image")) video.release();
