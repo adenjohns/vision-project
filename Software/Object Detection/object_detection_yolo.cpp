@@ -25,10 +25,8 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.3; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
-int inpWidth = 320; // 416;  // Width of network's input image
-int inpHeight = 240; // 416; // Height of network's input image
-int frameSkip = 2;
-int frameCounter = 0;
+// int inpWidth = 320; // 416;  // Width of network's input image
+// int inpHeight = 240; // 416; // Height of network's input image
 int inpWidth = 160;  // Reduced from 320 to 160 for faster processing
 int inpHeight = 120; // Reduced from 240 to 120 for faster processing
 int frameSkip = 3;   // Process every 3rd frame (increased from 2)
@@ -220,13 +218,11 @@ int main(int argc, char** argv)
         
         // Set input and run forward pass
         net.setInput(blob);
-        
-        // Run inference
-        auto forward_start = high_resolution_clock::now();
+
         
         // Time the forward pass
         auto forward_start = high_resolution_clock::now();
-        vector<Mat> outs;
+        vector<Mat> outs; // Run Inference
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
@@ -238,11 +234,6 @@ int main(int argc, char** argv)
         // Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
         auto total_duration = duration_cast<microseconds>(end - start).count();
         auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
-        string label = format("Total time: %.2f ms, Forward pass: %.2f ms, FPS: %.2f",
-                            total_duration/1000.0,
-                            forward_duration/1000.0,
-                            1000000.0/total_duration);
-        putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
         double duration = std::chrono::duration_cast<microseconds>( end - start ).count();
         alltimes += duration;
         count+=1;
@@ -252,13 +243,6 @@ int main(int argc, char** argv)
         double t = net.getPerfProfile(layersTimes) / freq;
         string label2 = format("Inference time for a frame : %.2f ms", t);
         putText(frame, label2, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-        
-        // End timing for frame processing
-        auto end = high_resolution_clock::now();
-        
-        // Calculate and display timing information
-        auto total_duration = duration_cast<microseconds>(end - start).count();
-        auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
         
         // Only update timing stats for processed frames
         if (!skipFrame) {
