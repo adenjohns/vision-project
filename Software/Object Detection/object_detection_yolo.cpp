@@ -27,6 +27,8 @@ float confThreshold = 0.3; // 0.5; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
 int inpWidth = 320; // 416;  // Width of network's input image
 int inpHeight = 240; // 416; // Height of network's input image
+int frameSkip = 2;
+int frameCounter = 0;
 vector<string> classes;
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
@@ -183,7 +185,11 @@ int main(int argc, char** argv)
         // get frame from the video
         cap >> frame;
         cout << "Frame channels: " << frame.channels() << endl; // print channels
-
+        // Skip frames based on frameSkip value
+        frameCounter++;
+        if (frameCounter % frameSkip != 0) {
+            continue;
+        }
 
         // Stop the program if reached end of video
         if (frame.empty()) {
@@ -192,6 +198,10 @@ int main(int argc, char** argv)
             waitKey(3000);
             break;
         }
+        
+        // timing for frame processing
+        auto start = high_resolution_clock::now();
+        
 	    std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         // Create a 4D blob from a frame.
         cv::cvtColor(frame, frame, COLOR_BGR2RGB);
@@ -218,23 +228,39 @@ int main(int argc, char** argv)
         //Sets the input to the network
         net.setInput(blob);
         
+        // Run inference
+        auto forward_start = high_resolution_clock::now();
+        
         // Runs the forward pass to get output of the output layers
         vector<Mat> outs;
         net.forward(outs, getOutputsNames(net));
+        auto forward_end = high_resolution_clock::now();
         
         // Remove the bounding boxes with low confidence
         postprocess(frame, oldframe, outs);
+        auto end = high_resolution_clock::now(); // end timing
 	    std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
         
         // Put efficiency information. The function getPerfProfile returns the overall time for inference(t) and the timings for each of the layers(in layersTimes)
+        auto total_duration = duration_cast<microseconds>(end - start).count();
+        auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
+        string label = format("Total time: %.2f ms, Forward pass: %.2f ms, FPS: %.2f",
+                            total_duration/1000.0,
+                            forward_duration/1000.0,
+                            1000000.0/total_duration);
+        putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+        double duration = std::chrono::duration_cast<microseconds>( end - start ).count();
+        alltimes += duration;
+        count+=1;
+        
         vector<double> layersTimes;
         double freq = getTickFrequency() / 1000;
         double t = net.getPerfProfile(layersTimes) / freq;
-        string label = format("Inference time for a frame : %.2f ms", t);
-        putText(frame, label, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-        double duration = std::chrono::duration_cast<microseconds>( t2 - t1 ).count();
-        alltimes += duration;
-        count +=1;
+        string label2 = format("Inference time for a frame : %.2f ms", t);
+        putText(frame, label2, Point(0, 15), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+        // double duration = std::chrono::duration_cast<microseconds>( t2 - t1 ).count();
+        // alltimes += duration;
+        // count +=1;
 
         std::cout<< label << " chrono time  = " << duration/1000.0<<std::endl;
             
