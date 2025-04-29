@@ -10,6 +10,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <chrono>
+#include <opencv2/core/ocl.hpp>  // Add OpenCL header
 
 const char* keys =
 "{help h usage ? | | Usage examples: \n\t\t./object_detection_yolo.out --image=dog.jpg \n\t\t./object_detection_yolo.out --video=run_sm.mp4}"
@@ -108,6 +109,32 @@ void scale_coords(Size img1, Size img0, Rect &box) {
 
 int main(int argc, char** argv)
 {
+    // Check OpenCL availability
+    bool haveOpenCL = cv::ocl::haveOpenCL();
+    bool useOpenCL = false;
+    
+    if (haveOpenCL) {
+        cv::ocl::Context context;
+        if (!context.create(cv::ocl::Device::TYPE_GPU)) {
+            cout << "OpenCL GPU context creation failed" << endl;
+        } else {
+            cout << "OpenCL GPU context created successfully" << endl;
+            cv::ocl::Device device = context.device(0);
+            cout << "OpenCL device: " << device.name() << endl;
+            useOpenCL = true;
+        }
+    } else {
+        cout << "OpenCL not available" << endl;
+    }
+
+    // Enable OpenCL if available
+    cv::ocl::setUseOpenCL(useOpenCL);
+    
+    // Pre-allocate memory buffers
+    cv::Mat frame_buffer(inpHeight, inpWidth, CV_8UC3);
+    cv::Mat blob_buffer(1, inpWidth * inpHeight * 3, CV_32F);
+    cv::Mat display_buffer(inpHeight, inpWidth, CV_8UC3);
+    
     CommandLineParser parser(argc, argv, keys);
     parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
     if (parser.has("help"))
@@ -128,8 +155,21 @@ int main(int argc, char** argv)
 
     // Load the network with optimized settings
     Net net = readNetFromDarknet(modelConfiguration, modelWeights);
-    net.setPreferableBackend(DNN_BACKEND_OPENCV);
-    net.setPreferableTarget(DNN_TARGET_CPU);
+    
+    // Try to use OpenCL backend if available
+    if (useOpenCL) {
+        cout << "Attempting to use OpenCL backend..." << endl;
+        if (!net.setPreferableBackend(DNN_BACKEND_OPENCV)) {
+            cout << "Failed to set OpenCV backend" << endl;
+        }
+        if (!net.setPreferableTarget(DNN_TARGET_OPENCL)) {
+            cout << "Failed to set OpenCL target, falling back to CPU" << endl;
+            net.setPreferableTarget(DNN_TARGET_CPU);
+        }
+    } else {
+        net.setPreferableBackend(DNN_BACKEND_OPENCV);
+        net.setPreferableTarget(DNN_TARGET_CPU);
+    }
     
     // Open a video file or an image file or a camera stream.
     string str, outputFile;
@@ -208,16 +248,15 @@ int main(int argc, char** argv)
         // Start timing for frame processing
         auto start = high_resolution_clock::now();
 
-        // Create a 4D blob from a frame with reduced size
-        cv::cvtColor(frame, frame, COLOR_BGR2RGB);
-        oldframe = frame.clone();
-        sz = letterbox(frame, inpWidth);  // Use reduced input size
+        // Use pre-allocated buffers
+        cv::resize(frame, frame_buffer, cv::Size(inpWidth, inpHeight));
+        cv::cvtColor(frame_buffer, frame_buffer, COLOR_BGR2RGB);
         
-        // Create blob with reduced size
-        blobFromImage(frame, blob, 1/255.0, Size(inpWidth, sz.height), Scalar(0,0,0), true, false);
+        // Create blob using pre-allocated buffer
+        blobFromImage(frame_buffer, blob_buffer, 1/255.0, Size(inpWidth, inpHeight), Scalar(0,0,0), true, false);
         
         // Set input and run forward pass
-        net.setInput(blob);
+        net.setInput(blob_buffer);
         
         // Time the forward pass
         auto forward_start = high_resolution_clock::now();
@@ -225,8 +264,8 @@ int main(int argc, char** argv)
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
-        // Remove the bounding boxes with low confidence
-        postprocess(frame, oldframe, outs);
+        // Process detections
+        postprocess(frame_buffer, frame_buffer, outs);
         
         // End timing for frame processing
         auto end = high_resolution_clock::now();
@@ -253,13 +292,15 @@ int main(int argc, char** argv)
             "Forward: %.1f ms\n"
             "Network: %.1f ms\n"
             "FPS: %.1f\n"
-            "Skip: %d",
+            "Skip: %d\n"
+            "Backend: %s",
             frameCounter,
             total_duration/1000.0,
             forward_duration/1000.0,
             t,
             1000000.0/total_duration,
-            frameSkip
+            frameSkip,
+            useOpenCL ? "OpenCL" : "CPU"
         );
         
         // Print to console
@@ -270,18 +311,16 @@ int main(int argc, char** argv)
         std::stringstream ss(label);
         std::string line;
         while (std::getline(ss, line)) {
-            putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+            putText(frame_buffer, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
             y += 20;
         }
         
         // Write the frame with the detection boxes
-        Mat detectedFrame;
-        frame.convertTo(detectedFrame, CV_8U);
-        cv::cvtColor(detectedFrame, detectedFrame, COLOR_RGB2BGR);
-        if (parser.has("image")) imwrite(outputFile, detectedFrame);
-        else if (!skipFrame) video.write(detectedFrame);
+        cv::cvtColor(frame_buffer, display_buffer, COLOR_RGB2BGR);
+        if (parser.has("image")) imwrite(outputFile, display_buffer);
+        else if (!skipFrame) video.write(display_buffer);
         
-        imshow(kWinName, frame);
+        imshow(kWinName, frame_buffer);
     }
     
     // Calculate and display final statistics
