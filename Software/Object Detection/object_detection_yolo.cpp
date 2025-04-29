@@ -26,18 +26,18 @@ using namespace std::chrono;
 
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
-float nmsThreshold = 0.5;  // Non-maximum suppression threshold
-// int inpWidth = 320; // 416;  // Width of network's input image
-// int inpHeight = 240; // 416; // Height of network's input image
-int inpWidth = 128;  // Reduced from 320 to 160 for faster processing
-int inpHeight = 96; // Reduced from 240 to 120 for faster processing
-int frameSkip = 4;   // Process every 3rd frame (increased from 2)
+float nmsThreshold = 0.3;  // Non-maximum suppression threshold
+float motionThreshold = 0.5;  // Motion detection threshold
+int inpWidth = 64;  // Reduced from 128 for faster processing
+int inpHeight = 48; // Reduced from 96 for faster processing
+int minFrameSkip = 2;  // Minimum frames to skip
+int maxFrameSkip = 4;  // Maximum frames to skip
+int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
 vector<string> classes;
 
 // Add these global variables after the existing ones
-float motionThreshold = 0.3;  // Threshold for motion detection
 Mat prevFrame, prevGray;
 bool firstFrame = true;
 
@@ -133,11 +133,17 @@ bool isKeyFrame(const Mat& currentFrame) {
     Scalar meanDiff = mean(diff);
     float motionScore = (meanDiff[0] + meanDiff[1] + meanDiff[2]) / 3.0;
     
+    // Adjust frame skip based on motion intensity
+    if (motionScore > motionThreshold) {
+        currentFrameSkip = minFrameSkip;  // Process more frames when motion is high
+    } else {
+        currentFrameSkip = maxFrameSkip;  // Skip more frames when motion is low
+    }
+    
     // Update previous frame
     currentFrame.copyTo(prevFrame);
     currentGray.copyTo(prevGray);
     
-    // Return true if motion is significant
     return motionScore > motionThreshold;
 }
 
@@ -279,9 +285,9 @@ int main(int argc, char** argv)
         // Check if this is a keyframe based on motion
         bool isKey = isKeyFrame(frame);
         
-        // Skip frames more efficiently
+        // Use dynamic frame skipping
         frameCounter++;
-        skipFrame = (frameCounter % frameSkip != 0) || !isKey;
+        skipFrame = !isKey && (frameCounter % currentFrameSkip != 0);
         
         if (skipFrame) {
             // Just display the frame without processing
@@ -293,9 +299,12 @@ int main(int argc, char** argv)
             string label = format(
                 "Frame %d:\n"
                 "FPS: %.1f\n"
-                "Skipped (No Motion)",
+                "Skip: %d\n"
+                "Motion: %s",
                 frameCounter,
-                fps
+                fps,
+                currentFrameSkip,
+                isKey ? "Yes" : "No"
             );
             
             // Display on frame
@@ -344,10 +353,8 @@ int main(int argc, char** argv)
         double t = net.getPerfProfile(layersTimes) / freq;
         
         // Update statistics
-        if (!skipFrame) {
-            alltimes += total_duration;
-            count += 1;
-        }
+        alltimes += total_duration;
+        count += 1;
         
         // Display timing information
         string label = format(
@@ -356,15 +363,12 @@ int main(int argc, char** argv)
             "Forward: %.1f ms\n"
             "Network: %.1f ms\n"
             "FPS: %.1f\n"
-            "Skip: %d\n"
-            "Backend: %s",
+            "Motion: %s",
             frameCounter,
             total_duration/1000.0,
             forward_duration/1000.0,
             t,
-            1000000.0/total_duration,
-            frameSkip,
-            useOpenCL ? "OpenCL" : "CPU"
+            isKey ? "Yes" : "No"
         );
         
         // Print to console
@@ -392,7 +396,7 @@ int main(int argc, char** argv)
     double effective_fps = 1000.0/mean_time;
     cout << "\n\nFinal Statistics:" << endl;
     cout << "MEAN TIME PER PROCESSED FRAME = " << mean_time << " ms" << endl;
-    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/frameSkip << endl;
+    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/currentFrameSkip << endl;
     cout << "TOTAL PROCESSED FRAMES = " << count << endl;
     
     cap.release();
