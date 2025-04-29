@@ -263,6 +263,9 @@ int main(int argc, char** argv)
     // Process frames.
     while (waitKey(1) < 0)
     {
+        // Start timing for frame processing
+        auto start = high_resolution_clock::now();
+        
         // get frame from the video
         cap >> frame;
         
@@ -282,13 +285,33 @@ int main(int argc, char** argv)
         
         if (skipFrame) {
             // Just display the frame without processing
+            // Calculate and display FPS even for skipped frames
+            auto end = high_resolution_clock::now();
+            auto duration = duration_cast<microseconds>(end - start).count();
+            double fps = 1000000.0 / duration;
+            
+            string label = format(
+                "Frame %d:\n"
+                "FPS: %.1f\n"
+                "Skipped (No Motion)",
+                frameCounter,
+                fps
+            );
+            
+            // Display on frame
+            int y = 15;
+            std::stringstream ss(label);
+            std::string line;
+            while (std::getline(ss, line)) {
+                putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+                y += 20;
+            }
+            
             imshow(kWinName, frame);
             continue;
         }
 
-        // Start timing for frame processing
-        auto start = high_resolution_clock::now();
-
+        // Process frame with YOLO
         // Use pre-allocated buffers
         cv::resize(frame, frame_buffer, cv::Size(inpWidth, inpHeight));
         cv::cvtColor(frame_buffer, frame_buffer, COLOR_BGR2RGB);
