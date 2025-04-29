@@ -28,8 +28,8 @@ using namespace std::chrono;
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
 float motionThreshold = 0.5;  // Motion detection threshold
-int inpWidth = 64;  // Reduced from 128 for faster processing
-int inpHeight = 48; // Reduced from 96 for faster processing
+int inpWidth = 128;  // Reduced from 128 for faster processing
+int inpHeight = 96; // Reduced from 96 for faster processing
 int minFrameSkip = 2;  // Minimum frames to skip
 int maxFrameSkip = 4;  // Maximum frames to skip
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
