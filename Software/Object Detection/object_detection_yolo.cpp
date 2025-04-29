@@ -115,13 +115,13 @@ int main(int argc, char** argv)
     
     if (haveOpenCL) {
         cv::ocl::Context context;
-        if (!context.create(cv::ocl::Device::TYPE_GPU)) {
-            cout << "OpenCL GPU context creation failed" << endl;
-        } else {
+        if (context.create(cv::ocl::Device::TYPE_GPU)) {
             cout << "OpenCL GPU context created successfully" << endl;
             cv::ocl::Device device = context.device(0);
             cout << "OpenCL device: " << device.name() << endl;
             useOpenCL = true;
+        } else {
+            cout << "OpenCL GPU context creation failed" << endl;
         }
     } else {
         cout << "OpenCL not available" << endl;
@@ -159,12 +159,16 @@ int main(int argc, char** argv)
     // Try to use OpenCL backend if available
     if (useOpenCL) {
         cout << "Attempting to use OpenCL backend..." << endl;
-        if (!net.setPreferableBackend(DNN_BACKEND_OPENCV)) {
-            cout << "Failed to set OpenCV backend" << endl;
-        }
-        if (!net.setPreferableTarget(DNN_TARGET_OPENCL)) {
-            cout << "Failed to set OpenCL target, falling back to CPU" << endl;
+        try {
+            net.setPreferableBackend(DNN_BACKEND_OPENCV);
+            net.setPreferableTarget(DNN_TARGET_OPENCL);
+            cout << "Successfully set OpenCL backend and target" << endl;
+        } catch (const cv::Exception& e) {
+            cout << "Failed to set OpenCL backend/target: " << e.what() << endl;
+            cout << "Falling back to CPU" << endl;
+            net.setPreferableBackend(DNN_BACKEND_OPENCV);
             net.setPreferableTarget(DNN_TARGET_CPU);
+            useOpenCL = false;
         }
     } else {
         net.setPreferableBackend(DNN_BACKEND_OPENCV);
