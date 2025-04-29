@@ -25,7 +25,7 @@ using namespace std;
 using namespace std::chrono;
 
 // Initialize the parameters
-float confThreshold = 0.3; // Confidence threshold
+float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.5;  // Non-maximum suppression threshold
 // int inpWidth = 320; // 416;  // Width of network's input image
 // int inpHeight = 240; // 416; // Height of network's input image
@@ -37,7 +37,7 @@ bool skipFrame = false;
 vector<string> classes;
 
 // Add these global variables after the existing ones
-float motionThreshold = 0.1;  // Threshold for motion detection
+float motionThreshold = 0.3;  // Threshold for motion detection
 Mat prevFrame, prevGray;
 bool firstFrame = true;
 
