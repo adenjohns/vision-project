@@ -269,8 +269,8 @@ int main(int argc, char** argv)
     // Process frames.
     while (waitKey(1) < 0)
     {
-        // Start timing for frame processing
-        auto start = high_resolution_clock::now();
+        // Start timing for frame capture
+        auto capture_start = high_resolution_clock::now();
         
         // get frame from the video
         cap >> frame;
@@ -282,6 +282,9 @@ int main(int argc, char** argv)
             break;
         }
 
+        auto capture_end = high_resolution_clock::now();
+        auto capture_time = duration_cast<microseconds>(capture_end - capture_start).count();
+        
         // Check if this is a keyframe based on motion
         bool isKey = isKeyFrame(frame);
         
@@ -291,18 +294,15 @@ int main(int argc, char** argv)
         
         if (skipFrame) {
             // Just display the frame without processing
-            // Calculate and display FPS even for skipped frames
-            auto end = high_resolution_clock::now();
-            auto duration = duration_cast<microseconds>(end - start).count();
-            double fps = 1000000.0 / duration;
+            auto display_start = high_resolution_clock::now();
             
             string label = format(
                 "Frame %d:\n"
-                "FPS: %.1f\n"
+                "Display FPS: %.1f\n"
                 "Skip: %d\n"
                 "Motion: %s",
                 frameCounter,
-                fps,
+                1000000.0 / capture_time,
                 currentFrameSkip,
                 isKey ? "Yes" : "No"
             );
@@ -317,8 +317,19 @@ int main(int argc, char** argv)
             }
             
             imshow(kWinName, frame);
+            
+            auto display_end = high_resolution_clock::now();
+            auto display_time = duration_cast<microseconds>(display_end - display_start).count();
+            
+            // Update statistics for skipped frames
+            alltimes += capture_time + display_time;
+            count += 1;
+            
             continue;
         }
+
+        // Start timing for YOLO processing
+        auto process_start = high_resolution_clock::now();
 
         // Process frame with YOLO
         // Use pre-allocated buffers
@@ -340,34 +351,28 @@ int main(int argc, char** argv)
         // Process detections
         postprocess(frame_buffer, frame_buffer, outs);
         
-        // End timing for frame processing
-        auto end = high_resolution_clock::now();
+        // End timing for YOLO processing
+        auto process_end = high_resolution_clock::now();
+        auto process_time = duration_cast<microseconds>(process_end - process_start).count();
         
         // Calculate timing information
-        auto total_duration = duration_cast<microseconds>(end - start).count();
-        auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
-        
-        // Get network performance profile
-        vector<double> layersTimes;
-        double freq = getTickFrequency() / 1000;
-        double t = net.getPerfProfile(layersTimes) / freq;
+        auto total_time = capture_time + process_time;
         
         // Update statistics
-        alltimes += total_duration;
+        alltimes += total_time;
         count += 1;
         
         // Display timing information
         string label = format(
             "Frame %d:\n"
-            "Total: %.1f ms\n"
-            "Forward: %.1f ms\n"
-            "Network: %.1f ms\n"
-            "FPS: %.1f\n"
+            "Display FPS: %.1f\n"
+            "Process FPS: %.1f\n"
+            "Total Time: %.1f ms\n"
             "Motion: %s",
             frameCounter,
-            total_duration/1000.0,
-            forward_duration/1000.0,
-            t,
+            1000000.0 / capture_time,
+            1000000.0 / process_time,
+            total_time / 1000.0,
             isKey ? "Yes" : "No"
         );
         
