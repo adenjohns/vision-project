@@ -1,8 +1,14 @@
 
+
+
+
+
+
 # ---------------- OPTIONAL INTERFACES -----------------
 dtparam=i2c_arm=on            # keeps /dev/i2c-1 alive for the OLED
 dtparam=spi=on
 dtparam=audio=on
+
 
 # ---------------- 2-D DISPLAY & OTHER STUFF -----------
 dtoverlay=vc4-kms-v3d
@@ -11,6 +17,16 @@ disable_fw_kms_setup=1
 arm_64bit=1
 disable_overscan=1
 arm_boost=1
+# Automatically load initramfs files, if found
+auto_initramfs=1
+[cm4]
+# Enable host mode on the 2711 built-in XHCI USB controller.
+# This line should be removed if the legacy DWC2 controller is required
+# (e.g. for USB device mode) or if USB support is not required.
+otg_mode=1
+
+[cm5]
+dtoverlay=dwc2,dr_mode=host
 
 # ---------------- SECOND HARDWARE I²C -----------------
 # Enable the BSC-3 controller on its default pins:
