@@ -11,6 +11,7 @@
 #include <opencv2/highgui.hpp>
 #include <chrono>
 #include <opencv2/core/ocl.hpp>  // Add OpenCL header
+#include <opencv2/optflow.hpp>  // Add optical flow header
 
 const char* keys =
 "{help h usage ? | | Usage examples: \n\t\t./object_detection_yolo.out --image=dog.jpg \n\t\t./object_detection_yolo.out --video=run_sm.mp4}"
@@ -34,6 +35,11 @@ int frameSkip = 4;   // Process every 3rd frame (increased from 2)
 int frameCounter = 0;
 bool skipFrame = false;
 vector<string> classes;
+
+// Add these global variables after the existing ones
+float motionThreshold = 0.1;  // Threshold for motion detection
+Mat prevFrame, prevGray;
+bool firstFrame = true;
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
 void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& out);
@@ -105,6 +111,34 @@ void scale_coords(Size img1, Size img0, Rect &box) {
     
     // cout<<"after gain = " << box.x << " " << box.y << " " << box.width << " " << box.height << endl;
 
+}
+
+// Add this function before main()
+bool isKeyFrame(const Mat& currentFrame) {
+    if (firstFrame) {
+        firstFrame = false;
+        currentFrame.copyTo(prevFrame);
+        cvtColor(prevFrame, prevGray, COLOR_BGR2GRAY);
+        return true;
+    }
+
+    Mat currentGray;
+    cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
+    
+    // Calculate absolute difference between frames
+    Mat diff;
+    absdiff(prevGray, currentGray, diff);
+    
+    // Calculate mean difference
+    Scalar meanDiff = mean(diff);
+    float motionScore = (meanDiff[0] + meanDiff[1] + meanDiff[2]) / 3.0;
+    
+    // Update previous frame
+    currentFrame.copyTo(prevFrame);
+    currentGray.copyTo(prevGray);
+    
+    // Return true if motion is significant
+    return motionScore > motionThreshold;
 }
 
 int main(int argc, char** argv)
@@ -232,21 +266,24 @@ int main(int argc, char** argv)
         // get frame from the video
         cap >> frame;
         
-        // Skip frames more efficiently
-        frameCounter++;
-        skipFrame = (frameCounter % frameSkip != 0);
-        
-        if (skipFrame) {
-            // Just display the frame without processing
-            imshow(kWinName, frame);
-            continue;
-        }
-
         if (frame.empty()) {
             cout << "Done processing !!!" << endl;
             cout << "Output file is stored as " << outputFile << endl;
             waitKey(3000);
             break;
+        }
+
+        // Check if this is a keyframe based on motion
+        bool isKey = isKeyFrame(frame);
+        
+        // Skip frames more efficiently
+        frameCounter++;
+        skipFrame = (frameCounter % frameSkip != 0) || !isKey;
+        
+        if (skipFrame) {
+            // Just display the frame without processing
+            imshow(kWinName, frame);
+            continue;
         }
 
         // Start timing for frame processing
