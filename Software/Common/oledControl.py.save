@@ -1,0 +1,192 @@
+# SPDX-FileCopyrightText: 2017 Tony DiCola for Adafruit Industries
+# SPDX-FileCopyrightText: 2017 James DeVito for Adafruit Industries
+# SPDX-License-Identifier: MIT
+import os
+import time
+import warnings
+
+import board
+import busio
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
+import adafruit_ssd1306
+from adafruit_lc709203f import LC709203F
+from adafruit_extended_bus import ExtendedI2C as I2C
+
+# ──────────────────────────────────────────────────────────────────────────────
+# (A) Silence the irrelevant warning shown on Raspberry Pi when bit‑banging I²C
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    message="I2C frequency is not settable*",
+)
+
+# (B) OLED on the hardware I²C bus /dev/i2c‑1 (GPIO 2/3)
+i2c_oled = busio.I2C(board.SCL, board.SDA)
+disp = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c_oled)
+
+# (C) Battery gauge on the bit‑banged bus /dev/i2c‑3 (GPIO 22/23)
+i2c_batt = I2C(3)
+sensor = LC709203F(i2c_batt)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Display & drawing setup
+width, height = disp.width, disp.height
+image = Image.new("1", (width, height))  # 1‑bit image for SSD1306
+canvas = ImageDraw.Draw(image)
+font = ImageFont.load_default()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Load & preprocess the Team Vision logo once at start‑up
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "Team_Vision", "logo.png")
+try:
+    _logo_original = Image.open(LOGO_PATH)          # keep whatever mode it is
+except FileNotFoundError:
+    _logo_original = None
+
+if _logo_original is not None:
+    # Down-scale so logo height ≤ display height
+    if _logo_original.height > height:
+        scale = height / float(_logo_original.height)
+        new_size = (int(_logo_original.width * scale), height)
+        _logo_original = _logo_original.resize(new_size, Image.LANCZOS)
+
+    # If the image has an alpha channel flatten it on a black background
+    if _logo_original.mode in ("RGBA", "LA"):
+        alpha = _logo_original.getchannel("A")
+        rgb   = _logo_original.convert("RGB")
+        black_bg = Image.new("RGB", rgb.size, (0, 0, 0))
+        black_bg.paste(rgb, mask=alpha)
+        _logo_original = black_bg
+
+    # Convert to 1-bit *without* dithering to avoid speckled edges
+    logo = _logo_original.convert("1", dither=Image.NONE)
+else:
+    logo = None
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Main loop
+padding = -2
+text_top = padding
+
+while True:
+    # Clear frame‑buffer
+    canvas.rectangle((0, 0, width, height), outline=0, fill=0)
+
+    # Read battery information
+    voltage = sensor.cell_voltage        # V
+    percent = sensor.cell_percent        # %
+    temperature = sensor.cell_temperature  # °C
+
+    sensor.thermistor_bconstant = 3950
+    sensor.thermistor_enable = True
+
+    # Render text
+    canvas.text((0, text_top + 0), f"Voltage:{voltage:0.2f}V", font=font, fill=255)
+    canvas.text((0, text_top + 8), f"Charge: {percent:0.1f}%", font=font, fill=255)
+    canvas.text((0, text_top + 16), f"Temp: {temperature:0.2f}°C", font=font, fill=255)
+
+    # Paste logo (if available) in the top‑right corner **after** drawing text
+    if logo is not None:
+        image.paste(logo, (width - logo.width, 0))  # No mask needed – already 1‑bit
+
+    # Push frame‑buffer to the OLED
+    disp.image(image)
+    disp.show()
+    time.sleep(0.1)
+# SPDX-FileCopyrightText: 2017 Tony DiCola for Adafruit Industries
+# SPDX-FileCopyrightText: 2017 James DeVito for Adafruit Industries
+# SPDX-License-Identifier: MIT
+import os
+import time
+import warnings
+
+import board
+import busio
+from PIL import Image, ImageDraw, ImageFont, ImageOps
+
+import adafruit_ssd1306
+from adafruit_lc709203f import LC709203F
+from adafruit_extended_bus import ExtendedI2C as I2C
+
+# ──────────────────────────────────────────────────────────────────────────────
+# (A) Silence the irrelevant warning shown on Raspberry Pi when bit‑banging I²C
+warnings.filterwarnings(
+    "ignore",
+    category=RuntimeWarning,
+    message="I2C frequency is not settable*",
+)
+
+# (B) OLED on the hardware I²C bus /dev/i2c‑1 (GPIO 2/3)
+i2c_oled = busio.I2C(board.SCL, board.SDA)
+disp = adafruit_ssd1306.SSD1306_I2C(128, 32, i2c_oled)
+
+# (C) Battery gauge on the bit‑banged bus /dev/i2c‑3 (GPIO 22/23)
+i2c_batt = I2C(3)
+sensor = LC709203F(i2c_batt)
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Display & drawing setup
+width, height = disp.width, disp.height
+image = Image.new("1", (width, height))  # 1‑bit image for SSD1306
+canvas = ImageDraw.Draw(image)
+font = ImageFont.load_default()
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Load & preprocess the Team Vision logo once at start‑up
+LOGO_PATH = os.path.join(os.path.dirname(__file__), "Team_Vision", "logo.png")
+try:
+    _logo_original = Image.open(LOGO_PATH)          # keep whatever mode it is
+except FileNotFoundError:
+    _logo_original = None
+
+if _logo_original is not None:
+    # Down-scale so logo height ≤ display height
+    if _logo_original.height > height:
+        scale = height / float(_logo_original.height)
+        new_size = (int(_logo_original.width * scale), height)
+        _logo_original = _logo_original.resize(new_size, Image.LANCZOS)
+
+    # If the image has an alpha channel flatten it on a black background
+    if _logo_original.mode in ("RGBA", "LA"):
+        alpha = _logo_original.getchannel("A")
+        rgb   = _logo_original.convert("RGB")
+        black_bg = Image.new("RGB", rgb.size, (0, 0, 0))
+        black_bg.paste(rgb, mask=alpha)
+        _logo_original = black_bg
+
+    # Convert to 1-bit *without* dithering to avoid speckled edges
+    logo = _logo_original.convert("1", dither=Image.NONE)
+else:
+    logo = None
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Main loop
+padding = -2
+text_top = padding
+
+while True:
+    # Clear frame‑buffer
+    canvas.rectangle((0, 0, width, height), outline=0, fill=0)
+
+    # Read battery information
+    voltage = sensor.cell_voltage        # V
+    percent = sensor.cell_percent        # %
+    temperature = sensor.cell_temperature  # °C
+
+    sensor.thermistor_bconstant = 3950
+    sensor.thermistor_enable = True
+
+    # Render text
+    canvas.text((0, text_top + 0), f"Voltage:{voltage:0.2f}V", font=font, fill=255)
+    canvas.text((0, text_top + 8), f"Charge: {percent:0.1f}%", font=font, fill=255)
+    canvas.text((0, text_top + 16), f"Temp: {temperature:0.2f}°C", font=font, fill=255)
+
+    # Paste logo (if available) in the top‑right corner **after** drawing text
+    if logo is not None:
+        image.paste(logo, (width - logo.width, 0))  # No mask needed – already 1‑bit
+
+    # Push frame‑buffer to the OLED
+    disp.image(image)
+    disp.show()
+    time.sleep(0.1)
