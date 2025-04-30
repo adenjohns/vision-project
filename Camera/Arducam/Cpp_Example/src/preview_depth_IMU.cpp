@@ -20,6 +20,8 @@
 #include <thread>
 
 
+//ON EVERY LOGIN MUST FIRST RUN: xhost +SI:localuser:root 
+
 // Flag to control IMU program execution
 volatile bool running = true;
 
