@@ -20,7 +20,7 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/include)
 
 # Libraries 
-set(PIGPIO_LIBS pigpio rt pthread)
+set(PIGPIO_LIBS pigpiod_if2 rt pthread)
 
 # Add executable from src/ folder 
 add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 

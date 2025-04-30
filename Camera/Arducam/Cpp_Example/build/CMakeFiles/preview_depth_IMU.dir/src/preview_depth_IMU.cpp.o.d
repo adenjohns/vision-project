@@ -266,9 +266,10 @@ CMakeFiles/preview_depth_IMU.dir/src/preview_depth_IMU.cpp.o: \
  /usr/include/aarch64-linux-gnu/bits/ss_flags.h \
  /usr/include/aarch64-linux-gnu/bits/types/struct_sigstack.h \
  /usr/include/aarch64-linux-gnu/bits/sigthread.h \
- /usr/include/aarch64-linux-gnu/bits/signal_ext.h /usr/include/pigpio.h \
+ /usr/include/aarch64-linux-gnu/bits/signal_ext.h \
+ /usr/include/pigpiod_if2.h /usr/include/pigpio.h \
  /home/vision_rpi/vision_repo/vision-project/Camera/Arducam/Cpp_Example/include/RPI_BNO055.h \
- /usr/include/opencv4/opencv2/core.hpp \
+ /usr/include/pigpio.h /usr/include/opencv4/opencv2/core.hpp \
  /usr/include/opencv4/opencv2/core/cvdef.h \
  /usr/include/opencv4/opencv2/core/version.hpp \
  /usr/include/opencv4/opencv2/core/hal/interface.h \

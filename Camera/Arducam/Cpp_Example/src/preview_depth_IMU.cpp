@@ -6,7 +6,7 @@
 #include <unistd.h> // IMU libraries
 #include <iomanip>
 #include <csignal>
-#include <pigpio.h>
+#include <pigpiod_if2.h>
 #include "RPI_BNO055.h"
 #include <cmath>
 #include <cstdlib>
@@ -41,6 +41,10 @@ int max_width = 240;
 int max_height = 180;
 int max_range = 0;
 int confidence_value = 60; // original value of 30
+
+
+
+
 
 void on_confidence_changed(int pos, void *userdata)
 {
@@ -282,6 +286,119 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
     }
 }
 
+    // ###########################################################################################################
+    // AUDIO FEEDBACK START
+    // ###########################################################################################################
+
+//pigpio daemon
+int pi = pigpiod_if2(); //connect to running daemon
+if (pi<0)
+{
+    std::cerr << "Failed to initialize pigpio" << std::endl;
+            return 1;
+        }
+
+// Audio parameters
+const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
+const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
+const int AUDIO_FREQ = 1000;    // Base frequency in Hz
+const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
+const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
+
+
+
+class AudioFeedback {
+private:
+    int leftPin;
+    int rightPin;
+    bool initialized;
+
+public:
+    AudioFeedback(int leftPin = AUDIO_PIN_LEFT, int rightPin = AUDIO_PIN_RIGHT)
+        : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
+
+    bool initialize() {
+       
+
+        // Set pins as output
+        gpioSetMode(pi, leftPin, PI_OUTPUT);
+        gpioSetMode(pi, rightPin, PI_OUTPUT);
+
+        // Set PWM frequency
+        gpioSetPWMfrequency(pi, leftPin, AUDIO_FREQ);
+        gpioSetPWMfrequency(pi, rightPin, AUDIO_FREQ);
+
+        // Set PWM range
+        gpioSetPWMrange(pi, leftPin, AUDIO_RANGE);
+        gpioSetPWMrange(pi, rightPin, AUDIO_RANGE);
+
+        initialized = true;
+        return true;
+    }
+
+    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
+        if (!initialized) {
+            std::cerr << "AudioFeedback not initialized" << std::endl;
+            return;
+        }
+
+        // If no gaps found, play base volume on both speakers
+        if (gaps.empty()) {
+            gpioPWM(pi, leftPin, BASE_VOLUME);
+            gpioPWM(pi, rightPin, BASE_VOLUME);
+            return;
+        }
+
+        // Find the largest gap (most likely path)
+        const Gap& mainGap = gaps[0];
+        
+        // Calculate the center of the gap
+        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
+        
+        // Calculate the center of the image
+        float imageCenter = imageWidth / 2.0f;
+        
+        // Calculate distance from center (normalized to [0, 1])
+        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
+        
+        // Calculate volume based on distance from center
+        // The farther from center, the louder the volume
+        int maxVolume = AUDIO_RANGE;
+        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
+        
+        // Set volumes based on which side of center the gap is
+        if (gapCenter < imageCenter) {
+            // Gap is on the left side
+            gpioPWM(pi, leftPin, volume);
+            gpioPWM(pi, rightPin, BASE_VOLUME);
+        } else {
+            // Gap is on the right side
+            gpioPWM(pi, leftPin, BASE_VOLUME);
+            gpioPWM(pi, rightPin, volume);
+        }
+    }
+
+    void stop() {
+        if (initialized) {
+            gpioPWM(pi, leftPin, 0);
+            gpioPWM(pi, rightPin, 0);
+            pigpio_stop(pi);
+            initialized = false;
+        }
+    }
+
+    ~AudioFeedback() {
+        stop();
+    }
+};
+
+
+
+    
+    // ###########################################################################################################
+    // AUDIO FEEDBACK END
+    // ###########################################################################################################
+
 int main()
 {
     // Initialize audio feedback
@@ -298,10 +415,10 @@ int main()
     // Register signal handler
     signal(SIGINT, signalHandler);
     std::cout << "Activating BNO055 Sensor using pigpio\n";
-    gpioInitialise();  // Initialize pigpio early
+
 
     // This whole section is just to check if the i2c is working (and device is on correct bus)
-    int handle = i2cOpen(3, 0x28, 0);
+    int handle = i2cOpen(pi, 3, 0x28, 0);
     if (handle < 0) {
         std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
     } else {
@@ -348,112 +465,7 @@ int main()
     // IMU SETUP END
     // ###########################################################################################################
     
-    // ###########################################################################################################
-    // AUDIO FEEDBACK START
-    // ###########################################################################################################
 
-// Audio parameters
-const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
-const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
-const int AUDIO_FREQ = 1000;    // Base frequency in Hz
-const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
-const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
-
-
-class AudioFeedback {
-private:
-    int leftPin;
-    int rightPin;
-    bool initialized;
-
-public:
-    AudioFeedback(int leftPin = AUDIO_PIN_LEFT, int rightPin = AUDIO_PIN_RIGHT)
-        : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
-
-    bool initialize() {
-        if (gpioInitialise() < 0) {
-            std::cerr << "Failed to initialize pigpio" << std::endl;
-            return false;
-        }
-
-        // Set pins as output
-        gpioSetMode(leftPin, PI_OUTPUT);
-        gpioSetMode(rightPin, PI_OUTPUT);
-
-        // Set PWM frequency
-        gpioSetPWMfrequency(leftPin, AUDIO_FREQ);
-        gpioSetPWMfrequency(rightPin, AUDIO_FREQ);
-
-        // Set PWM range
-        gpioSetPWMrange(leftPin, AUDIO_RANGE);
-        gpioSetPWMrange(rightPin, AUDIO_RANGE);
-
-        initialized = true;
-        return true;
-    }
-
-    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
-        if (!initialized) {
-            std::cerr << "AudioFeedback not initialized" << std::endl;
-            return;
-        }
-
-        // If no gaps found, play base volume on both speakers
-        if (gaps.empty()) {
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, BASE_VOLUME);
-            return;
-        }
-
-        // Find the largest gap (most likely path)
-        const Gap& mainGap = gaps[0];
-        
-        // Calculate the center of the gap
-        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
-        
-        // Calculate the center of the image
-        float imageCenter = imageWidth / 2.0f;
-        
-        // Calculate distance from center (normalized to [0, 1])
-        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
-        
-        // Calculate volume based on distance from center
-        // The farther from center, the louder the volume
-        int maxVolume = AUDIO_RANGE;
-        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
-        
-        // Set volumes based on which side of center the gap is
-        if (gapCenter < imageCenter) {
-            // Gap is on the left side
-            gpioPWM(leftPin, volume);
-            gpioPWM(rightPin, BASE_VOLUME);
-        } else {
-            // Gap is on the right side
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, volume);
-        }
-    }
-
-    void stop() {
-        if (initialized) {
-            gpioPWM(leftPin, 0);
-            gpioPWM(rightPin, 0);
-            gpioTerminate();
-            initialized = false;
-        }
-    }
-
-    ~AudioFeedback() {
-        stop();
-    }
-};
-
-
-
-    
-    // ###########################################################################################################
-    // AUDIO FEEDBACK END
-    // ###########################################################################################################
 
     // ###########################################################################################################
     // ARDUCAM SETUP 
