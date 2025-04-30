@@ -6,7 +6,7 @@
 #include <unistd.h> // IMU libraries
 #include <iomanip>
 #include <csignal>
-#include <pigpiod_if2.h>
+#include <pigpio.h>
 #include "RPI_BNO055.h"
 #include <cmath>
 #include <cstdlib>
@@ -41,10 +41,6 @@ int max_width = 240;
 int max_height = 180;
 int max_range = 0;
 int confidence_value = 60; // original value of 30
-
-
-
-
 
 void on_confidence_changed(int pos, void *userdata)
 {
@@ -286,17 +282,10 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
     }
 }
 
+
     // ###########################################################################################################
     // AUDIO FEEDBACK START
     // ###########################################################################################################
-
-//pigpio daemon
-int pi = pigpiod_if2(); //connect to running daemon
-if (pi<0)
-{
-    std::cerr << "Failed to initialize pigpio" << std::endl;
-            return 1;
-        }
 
 // Audio parameters
 const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
@@ -304,6 +293,7 @@ const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
 const int AUDIO_FREQ = 1000;    // Base frequency in Hz
 const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
 const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
+
 
 
 
@@ -318,19 +308,22 @@ public:
         : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
 
     bool initialize() {
-       
+        if (gpioInitialise() < 0) {
+            std::cerr << "Failed to initialize pigpio" << std::endl;
+            return false;
+        }
 
         // Set pins as output
-        gpioSetMode(pi, leftPin, PI_OUTPUT);
-        gpioSetMode(pi, rightPin, PI_OUTPUT);
+        gpioSetMode(leftPin, PI_OUTPUT);
+        gpioSetMode(rightPin, PI_OUTPUT);
 
         // Set PWM frequency
-        gpioSetPWMfrequency(pi, leftPin, AUDIO_FREQ);
-        gpioSetPWMfrequency(pi, rightPin, AUDIO_FREQ);
+        gpioSetPWMfrequency(leftPin, AUDIO_FREQ);
+        gpioSetPWMfrequency(rightPin, AUDIO_FREQ);
 
         // Set PWM range
-        gpioSetPWMrange(pi, leftPin, AUDIO_RANGE);
-        gpioSetPWMrange(pi, rightPin, AUDIO_RANGE);
+        gpioSetPWMrange(leftPin, AUDIO_RANGE);
+        gpioSetPWMrange(rightPin, AUDIO_RANGE);
 
         initialized = true;
         return true;
@@ -344,8 +337,8 @@ public:
 
         // If no gaps found, play base volume on both speakers
         if (gaps.empty()) {
-            gpioPWM(pi, leftPin, BASE_VOLUME);
-            gpioPWM(pi, rightPin, BASE_VOLUME);
+            gpioPWM(leftPin, BASE_VOLUME);
+            gpioPWM(rightPin, BASE_VOLUME);
             return;
         }
 
@@ -369,20 +362,20 @@ public:
         // Set volumes based on which side of center the gap is
         if (gapCenter < imageCenter) {
             // Gap is on the left side
-            gpioPWM(pi, leftPin, volume);
-            gpioPWM(pi, rightPin, BASE_VOLUME);
+            gpioPWM(leftPin, volume);
+            gpioPWM(rightPin, BASE_VOLUME);
         } else {
             // Gap is on the right side
-            gpioPWM(pi, leftPin, BASE_VOLUME);
-            gpioPWM(pi, rightPin, volume);
+            gpioPWM(leftPin, BASE_VOLUME);
+            gpioPWM(rightPin, volume);
         }
     }
 
     void stop() {
         if (initialized) {
-            gpioPWM(pi, leftPin, 0);
-            gpioPWM(pi, rightPin, 0);
-            pigpio_stop(pi);
+            gpioPWM(leftPin, 0);
+            gpioPWM(rightPin, 0);
+            gpioTerminate();
             initialized = false;
         }
     }
@@ -399,8 +392,10 @@ public:
     // AUDIO FEEDBACK END
     // ###########################################################################################################
 
+
 int main()
 {
+    gpioInitialise();
     // Initialize audio feedback
     AudioFeedback audio;
     if (!audio.initialize()) {
@@ -415,10 +410,10 @@ int main()
     // Register signal handler
     signal(SIGINT, signalHandler);
     std::cout << "Activating BNO055 Sensor using pigpio\n";
-
+    gpioInitialise();  // Initialize pigpio early
 
     // This whole section is just to check if the i2c is working (and device is on correct bus)
-    int handle = i2cOpen(pi, 3, 0x28, 0);
+    int handle = i2cOpen(4, 0x28, 0);
     if (handle < 0) {
         std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
     } else {
@@ -427,7 +422,7 @@ int main()
     }
 
     // Create sensor instance with bus 1 and address 0x28
-    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 1);  // Try using bus 1 instead (should be the case)
+    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 4);  // Try using bus 1 instead (should be the case)
     
     // Initialize the sensor 
     if (!bno.begin()) {
