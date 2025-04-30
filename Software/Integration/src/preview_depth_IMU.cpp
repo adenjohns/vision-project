@@ -20,6 +20,8 @@
 #include <thread>
 
 
+//ON EVERY LOGIN MUST FIRST RUN: xhost +SI:localuser:root 
+
 // Flag to control IMU program execution
 volatile bool running = true;
 
@@ -61,7 +63,7 @@ void signalHandler(int signum) {
 void display_fps(void)
 {
     using std::chrono::high_resolution_clock;
-    using namespace std::chrono_literals;
+    using namespace std::literals;
     static int count = 0;
     static auto time_beg = high_resolution_clock::now();
     auto time_end = high_resolution_clock::now();
@@ -282,72 +284,7 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
     }
 }
 
-int main()
-{
-    // Initialize audio feedback
-    AudioFeedback audio;
-    if (!audio.initialize()) {
-        std::cerr << "Failed to initialize audio feedback" << std::endl;
-        return -1;
-    }
-    
-    // ###########################################################################################################
-    // IMU SETUP 
-    // ###########################################################################################################
-    
-    // Register signal handler
-    signal(SIGINT, signalHandler);
-    std::cout << "Activating BNO055 Sensor using pigpio\n";
-    gpioInitialise();  // Initialize pigpio early
 
-    // This whole section is just to check if the i2c is working (and device is on correct bus)
-    int handle = i2cOpen(3, 0x28, 0);
-    if (handle < 0) {
-        std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
-    } else {
-        std::cout << "Direct i2cOpen test succeeded with handle: " << handle << std::endl;
-        i2cClose(handle);
-    }
-
-    // Create sensor instance with bus 1 and address 0x28
-    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 1);  // Try using bus 1 instead (should be the case)
-    
-    // Initialize the sensor 
-    if (!bno.begin()) {
-        std::cerr << "Failed to initialize BNO055 sensor!\n";
-        return -1;
-    }
-    
-    std::cout << "BNO055 sensor initialized successfully!\n";
-    
-    // Set external crystal for better accuracy (if available)
-    bno.setExtCrystalUse(true);
-    
-    // Get chip information
-    bno055_rev_info_t revInfo;
-    bno.getRevInfo(&revInfo);
-    
-    std::cout << "Sensor Information:\n";
-    std::cout << "- System Rev: " << (int)revInfo.bl_rev << "\n";
-    std::cout << "- Accelerometer Rev: " << (int)revInfo.accel_rev << "\n";
-    std::cout << "- Gyroscope Rev: " << (int)revInfo.gyro_rev << "\n";
-    std::cout << "- Magnetometer Rev: " << (int)revInfo.mag_rev << "\n";
-    std::cout << "- Software Rev: " << revInfo.sw_rev << "\n";
-    
-    std::cout << "\nReading sensor data...\n";
-    std::cout << "Press Ctrl+C to exit\n\n";
-    
-    // Variables for motion detection
-    imu::Vector<3> previousGyro;
-    bool firstReading = true;
-    std::chrono::steady_clock::time_point lastMotionTime;
-    const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
-    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
-    
-    // ###########################################################################################################
-    // IMU SETUP END
-    // ###########################################################################################################
-    
     // ###########################################################################################################
     // AUDIO FEEDBACK START
     // ###########################################################################################################
@@ -358,6 +295,8 @@ const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
 const int AUDIO_FREQ = 1000;    // Base frequency in Hz
 const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
 const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
+
+
 
 
 class AudioFeedback {
@@ -454,6 +393,76 @@ public:
     // ###########################################################################################################
     // AUDIO FEEDBACK END
     // ###########################################################################################################
+
+
+int main()
+{
+    gpioInitialise();
+    // Initialize audio feedback
+    AudioFeedback audio;
+    if (!audio.initialize()) {
+        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        return -1;
+    }
+    
+    // ###########################################################################################################
+    // IMU SETUP 
+    // ###########################################################################################################
+    
+    // Register signal handler
+    signal(SIGINT, signalHandler);
+    std::cout << "Activating BNO055 Sensor using pigpio\n";
+    gpioInitialise();  // Initialize pigpio early
+
+    // This whole section is just to check if the i2c is working (and device is on correct bus)
+    int handle = i2cOpen(4, 0x28, 0);
+    if (handle < 0) {
+        std::cerr << "Direct i2cOpen test failed with error: " << handle << std::endl;
+    } else {
+        std::cout << "Direct i2cOpen test succeeded with handle: " << handle << std::endl;
+        i2cClose(handle);
+    }
+
+    // Create sensor instance with bus 1 and address 0x28
+    RPI_BNO055 bno(-1, BNO055_ADDRESS_A, 4);  // Try using bus 1 instead (should be the case)
+    
+    // Initialize the sensor 
+    if (!bno.begin()) {
+        std::cerr << "Failed to initialize BNO055 sensor!\n";
+        return -1;
+    }
+    
+    std::cout << "BNO055 sensor initialized successfully!\n";
+    
+    // Set external crystal for better accuracy (if available)
+    bno.setExtCrystalUse(true);
+    
+    // Get chip information
+    bno055_rev_info_t revInfo;
+    bno.getRevInfo(&revInfo);
+    
+    std::cout << "Sensor Information:\n";
+    std::cout << "- System Rev: " << (int)revInfo.bl_rev << "\n";
+    std::cout << "- Accelerometer Rev: " << (int)revInfo.accel_rev << "\n";
+    std::cout << "- Gyroscope Rev: " << (int)revInfo.gyro_rev << "\n";
+    std::cout << "- Magnetometer Rev: " << (int)revInfo.mag_rev << "\n";
+    std::cout << "- Software Rev: " << revInfo.sw_rev << "\n";
+    
+    std::cout << "\nReading sensor data...\n";
+    std::cout << "Press Ctrl+C to exit\n\n";
+    
+    // Variables for motion detection
+    imu::Vector<3> previousGyro;
+    bool firstReading = true;
+    std::chrono::steady_clock::time_point lastMotionTime;
+    const float MOTION_THRESHOLD = 5.0f;  // 5 degrees threshold for low power standby purposes
+    const int SHUTDOWN_TIMEOUT = 30;      // 30 seconds timeout (both of these can be changed depending on needs)
+    
+    // ###########################################################################################################
+    // IMU SETUP END
+    // ###########################################################################################################
+    
+
 
     // ###########################################################################################################
     // ARDUCAM SETUP 

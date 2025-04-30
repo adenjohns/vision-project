@@ -1,4 +1,4 @@
-/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles/VisionApp.dir
 /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles/detector.dir
+/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles/preview_depth.dir
 /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles/edit_cache.dir
 /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles/rebuild_cache.dir

@@ -63,8 +63,8 @@ CMAKE_BINARY_DIR = /home/vision-rpi/Desktop/vision-project/Software/Integration/
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/VisionApp.dir/all
 all: CMakeFiles/detector.dir/all
+all: CMakeFiles/preview_depth.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -72,35 +72,9 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/VisionApp.dir/clean
 clean: CMakeFiles/detector.dir/clean
+clean: CMakeFiles/preview_depth.dir/clean
 .PHONY : clean
-
-#=============================================================================
-# Target rules for target CMakeFiles/VisionApp.dir
-
-# All Build rule for target.
-CMakeFiles/VisionApp.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=1,2,3 "Built target VisionApp"
-.PHONY : CMakeFiles/VisionApp.dir/all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/VisionApp.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 3
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/VisionApp.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 0
-.PHONY : CMakeFiles/VisionApp.dir/rule
-
-# Convenience name for target.
-VisionApp: CMakeFiles/VisionApp.dir/rule
-.PHONY : VisionApp
-
-# clean rule for target.
-CMakeFiles/VisionApp.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/clean
-.PHONY : CMakeFiles/VisionApp.dir/clean
 
 #=============================================================================
 # Target rules for target CMakeFiles/detector.dir
@@ -109,7 +83,7 @@ CMakeFiles/VisionApp.dir/clean:
 CMakeFiles/detector.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=4,5 "Built target detector"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=1,2 "Built target detector"
 .PHONY : CMakeFiles/detector.dir/all
 
 # Build rule for subdir invocation for target.
@@ -127,6 +101,32 @@ detector: CMakeFiles/detector.dir/rule
 CMakeFiles/detector.dir/clean:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/clean
 .PHONY : CMakeFiles/detector.dir/clean
+
+#=============================================================================
+# Target rules for target CMakeFiles/preview_depth.dir
+
+# All Build rule for target.
+CMakeFiles/preview_depth.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=3,4 "Built target preview_depth"
+.PHONY : CMakeFiles/preview_depth.dir/all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/preview_depth.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 2
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/preview_depth.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 0
+.PHONY : CMakeFiles/preview_depth.dir/rule
+
+# Convenience name for target.
+preview_depth: CMakeFiles/preview_depth.dir/rule
+.PHONY : preview_depth
+
+# clean rule for target.
+CMakeFiles/preview_depth.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/clean
+.PHONY : CMakeFiles/preview_depth.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.

@@ -32,20 +32,20 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS "-g -std=c++11")
 
 # Add executable from src/ folder 
-add_executable(VisionApp
-	# src/object_detection_yolo.cpp # (file not currently in src directory)
-	src/preview_depth_IMU.cpp
-	src/RPI_BNO055.cpp) 
-target_link_libraries(VisionApp
-	${CXXLIBS}
-	${OpenCV_LIBS}
-	${PIGPIO_LIBS})
+#add_executable(VisionApp
+	## src/object_detection_yolo.cpp # (file not currently in src directory)
+	#src/preview_depth_IMU.cpp
+	#src/RPI_BNO055.cpp) 
+#target_link_libraries(VisionApp
+	#${CXXLIBS}
+	#${OpenCV_LIBS}
+	#${PIGPIO_LIBS})
 
 add_executable( detector object_detection_yolo.cpp )
 target_link_libraries(detector  ${OpenCV_LIBS} )
 
-# add_executable(preview_depth src/preview_depth.cpp)
-# target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
+add_executable(preview_depth src/preview_depth.cpp)
+target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
 
 # aux_source_directory(example DIR_SRCS)
 # add_executable(example ${DIR_SRCS})

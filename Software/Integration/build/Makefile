@@ -117,19 +117,6 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named VisionApp
-
-# Build rule for target.
-VisionApp: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 VisionApp
-.PHONY : VisionApp
-
-# fast build rule for target.
-VisionApp/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/build
-.PHONY : VisionApp/fast
-
-#=============================================================================
 # Target rules for targets named detector
 
 # Build rule for target.
@@ -141,6 +128,19 @@ detector: cmake_check_build_system
 detector/fast:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/build
 .PHONY : detector/fast
+
+#=============================================================================
+# Target rules for targets named preview_depth
+
+# Build rule for target.
+preview_depth: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preview_depth
+.PHONY : preview_depth
+
+# fast build rule for target.
+preview_depth/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/build
+.PHONY : preview_depth/fast
 
 object_detection_yolo.o: object_detection_yolo.cpp.o
 .PHONY : object_detection_yolo.o
@@ -166,53 +166,29 @@ object_detection_yolo.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/object_detection_yolo.cpp.s
 .PHONY : object_detection_yolo.cpp.s
 
-src/RPI_BNO055.o: src/RPI_BNO055.cpp.o
-.PHONY : src/RPI_BNO055.o
+src/preview_depth.o: src/preview_depth.cpp.o
+.PHONY : src/preview_depth.o
 
 # target to build an object file
-src/RPI_BNO055.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/RPI_BNO055.cpp.o
-.PHONY : src/RPI_BNO055.cpp.o
+src/preview_depth.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o
+.PHONY : src/preview_depth.cpp.o
 
-src/RPI_BNO055.i: src/RPI_BNO055.cpp.i
-.PHONY : src/RPI_BNO055.i
-
-# target to preprocess a source file
-src/RPI_BNO055.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/RPI_BNO055.cpp.i
-.PHONY : src/RPI_BNO055.cpp.i
-
-src/RPI_BNO055.s: src/RPI_BNO055.cpp.s
-.PHONY : src/RPI_BNO055.s
-
-# target to generate assembly for a file
-src/RPI_BNO055.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/RPI_BNO055.cpp.s
-.PHONY : src/RPI_BNO055.cpp.s
-
-src/preview_depth_IMU.o: src/preview_depth_IMU.cpp.o
-.PHONY : src/preview_depth_IMU.o
-
-# target to build an object file
-src/preview_depth_IMU.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/preview_depth_IMU.cpp.o
-.PHONY : src/preview_depth_IMU.cpp.o
-
-src/preview_depth_IMU.i: src/preview_depth_IMU.cpp.i
-.PHONY : src/preview_depth_IMU.i
+src/preview_depth.i: src/preview_depth.cpp.i
+.PHONY : src/preview_depth.i
 
 # target to preprocess a source file
-src/preview_depth_IMU.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/preview_depth_IMU.cpp.i
-.PHONY : src/preview_depth_IMU.cpp.i
+src/preview_depth.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i
+.PHONY : src/preview_depth.cpp.i
 
-src/preview_depth_IMU.s: src/preview_depth_IMU.cpp.s
-.PHONY : src/preview_depth_IMU.s
+src/preview_depth.s: src/preview_depth.cpp.s
+.PHONY : src/preview_depth.s
 
 # target to generate assembly for a file
-src/preview_depth_IMU.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/preview_depth_IMU.cpp.s
-.PHONY : src/preview_depth_IMU.cpp.s
+src/preview_depth.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s
+.PHONY : src/preview_depth.cpp.s
 
 # Help Target
 help:
@@ -222,17 +198,14 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... VisionApp"
 	@echo "... detector"
+	@echo "... preview_depth"
 	@echo "... object_detection_yolo.o"
 	@echo "... object_detection_yolo.i"
 	@echo "... object_detection_yolo.s"
-	@echo "... src/RPI_BNO055.o"
-	@echo "... src/RPI_BNO055.i"
-	@echo "... src/RPI_BNO055.s"
-	@echo "... src/preview_depth_IMU.o"
-	@echo "... src/preview_depth_IMU.i"
-	@echo "... src/preview_depth_IMU.s"
+	@echo "... src/preview_depth.o"
+	@echo "... src/preview_depth.i"
+	@echo "... src/preview_depth.s"
 .PHONY : help
 
 
