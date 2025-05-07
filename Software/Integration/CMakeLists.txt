@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.4)
 project( Vid2Img )
-
 project(VisionIntegration)
 
 # Find and Configure all Dependencies
+
 # Arducam
 find_package(ArducamDepthCamera REQUIRED)
 set(CLIBS ArducamDepthCamera::ArducamDepthCamera4C)
@@ -20,35 +20,25 @@ include_directories(${OpenCV_INCLUDE_DIRS})
 
 # Include Directory
 include_directories(${PROJECT_SOURCE_DIR}/include)
-include_directories(
-	${OpenCV_INCLUDE_DIRS}
-	${PROJECT_SOURCE_DIR}/include
-)
+include_directories(${OpenCV_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include)
 
 # Libraries 
 set(PIGPIO_LIBS pigpio rt pthread)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS "-g -std=c++11")
 
 # Add executable from src/ folder 
-#add_executable(VisionApp
-	## src/object_detection_yolo.cpp # (file not currently in src directory)
-	#src/preview_depth_IMU.cpp
-	#src/RPI_BNO055.cpp) 
-#target_link_libraries(VisionApp
-	#${CXXLIBS}
-	#${OpenCV_LIBS}
-	#${PIGPIO_LIBS})
+add_executable(VisionApp src/camera_integration.cpp ) 
+target_link_libraries(VisionApp ${CXXLIBS} ${OpenCV_LIBS})
 
-add_executable( detector object_detection_yolo.cpp )
-target_link_libraries(detector  ${OpenCV_LIBS} )
+	#add_executable( detector object_detection_yolo.cpp )
+	#target_link_libraries(detector  ${OpenCV_LIBS} )
 
-add_executable(preview_depth src/preview_depth.cpp)
-target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
+	#add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 
+	#target_link_libraries(preview_depth_IMU ${CXXLIBS} ${OpenCV_LIBS} ${PIGPIO_LIBS})
 
-# aux_source_directory(example DIR_SRCS)
-# add_executable(example ${DIR_SRCS})
-# target_link_libraries(example ${CXXLIBS} ${OpenCV_LIBS})
+	#add_executable(preview_depth src/preview_depth.cpp)
+	#target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})
 
-# add_executable(hello_world src/hello_world.cpp)
+	# add_executable(hello_world src/hello_world.cpp)

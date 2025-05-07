@@ -3,6 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <filesystem>
+#include <regex> 
 
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
@@ -25,8 +27,6 @@ using namespace cv;
 using namespace dnn;
 using namespace std;
 using namespace std::chrono;
-
-
 using namespace Arducam;
 
 using Eigen::MatrixXd;
@@ -36,15 +36,33 @@ using std::endl;
 using std::vector;
 using std::sort;
 
+int max_width = 240;
+int max_height = 180;
+int max_range = 0;
+int confidence_value = 60;
+
 // MAX_DISTANCE value modifiable  is 2 or 4
 #define MAX_DISTANCE 4000
 
 cv::Rect seletRect(0, 0, 0, 0);
 cv::Rect followRect(0, 0, 0, 0);
-int max_width = 240;
-int max_height = 180;
-int max_range = 0;
-int confidence_value = 60;
+
+
+int getVidIdxFromSymlink(const std::string &symlinkPath) {
+ 
+    namespace fs = std::filesystem; 
+    try { 
+        fs::path realPath = fs::read_symlink(symlinkPath);
+        std::string filename = realPath.filename(); // e.g., "video1"
+        std::smatch match; 
+        if (std::regex_search(filename, match, std::regex("video(\\d+)"))) {
+            return std::stoi(match[1]);
+        }
+    } catch (const fs::filesystem_error &e) {
+        std::cerr << "Error resolving symlink: " << e.what() << std::endl;
+    }
+    return -1; // error
+}
 
 void on_confidence_changed(int pos, void *userdata)
 {
@@ -278,9 +296,15 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 
 int main()
 {
+    int videoIndex = getVidIdxFromSymlink("/dev/video-arducam");
+    if (videoIndex == -1) {
+        std::cerr << "Failed to resolve video index for Arducam" << std::endl;
+        return -1;
+    } 
+    
     ArducamTOFCamera tof;
     ArducamFrameBuffer *frame;
-    if (tof.open(Connection::CSI, 0))
+    if (tof.open(Connection::CSI, videoIndex))
     {
         std::cerr << "Failed to open camera" << std::endl;
         return -1;

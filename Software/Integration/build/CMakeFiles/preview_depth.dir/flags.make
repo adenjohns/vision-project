@@ -6,5 +6,5 @@ CXX_DEFINES =
 
 CXX_INCLUDES = -I/usr/include/eigen3 -I/home/vision-rpi/Desktop/vision-project/Software/Integration/include -isystem /usr/include/opencv4
 
-CXX_FLAGS = -std=gnu++14
+CXX_FLAGS = -std=gnu++17
 

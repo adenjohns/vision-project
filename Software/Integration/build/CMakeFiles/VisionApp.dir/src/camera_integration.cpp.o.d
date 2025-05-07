@@ -1,5 +1,5 @@
-CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o: \
- /home/vision-rpi/Desktop/vision-project/Software/Integration/src/preview_depth.cpp \
+CMakeFiles/VisionApp.dir/src/camera_integration.cpp.o: \
+ /home/vision-rpi/Desktop/vision-project/Software/Integration/src/camera_integration.cpp \
  /usr/include/stdc-predef.h /usr/include/ArducamTOFCamera.hpp \
  /usr/include/c++/12/atomic /usr/include/c++/12/bits/atomic_base.h \
  /usr/include/aarch64-linux-gnu/c++/12/bits/c++config.h \

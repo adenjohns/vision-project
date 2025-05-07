@@ -117,78 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named detector
+# Target rules for targets named VisionApp
 
 # Build rule for target.
-detector: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 detector
-.PHONY : detector
+VisionApp: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 VisionApp
+.PHONY : VisionApp
 
 # fast build rule for target.
-detector/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/build
-.PHONY : detector/fast
+VisionApp/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/build
+.PHONY : VisionApp/fast
 
-#=============================================================================
-# Target rules for targets named preview_depth
-
-# Build rule for target.
-preview_depth: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 preview_depth
-.PHONY : preview_depth
-
-# fast build rule for target.
-preview_depth/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/build
-.PHONY : preview_depth/fast
-
-object_detection_yolo.o: object_detection_yolo.cpp.o
-.PHONY : object_detection_yolo.o
+src/camera_integration.o: src/camera_integration.cpp.o
+.PHONY : src/camera_integration.o
 
 # target to build an object file
-object_detection_yolo.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/object_detection_yolo.cpp.o
-.PHONY : object_detection_yolo.cpp.o
+src/camera_integration.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.o
+.PHONY : src/camera_integration.cpp.o
 
-object_detection_yolo.i: object_detection_yolo.cpp.i
-.PHONY : object_detection_yolo.i
-
-# target to preprocess a source file
-object_detection_yolo.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/object_detection_yolo.cpp.i
-.PHONY : object_detection_yolo.cpp.i
-
-object_detection_yolo.s: object_detection_yolo.cpp.s
-.PHONY : object_detection_yolo.s
-
-# target to generate assembly for a file
-object_detection_yolo.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/object_detection_yolo.cpp.s
-.PHONY : object_detection_yolo.cpp.s
-
-src/preview_depth.o: src/preview_depth.cpp.o
-.PHONY : src/preview_depth.o
-
-# target to build an object file
-src/preview_depth.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.o
-.PHONY : src/preview_depth.cpp.o
-
-src/preview_depth.i: src/preview_depth.cpp.i
-.PHONY : src/preview_depth.i
+src/camera_integration.i: src/camera_integration.cpp.i
+.PHONY : src/camera_integration.i
 
 # target to preprocess a source file
-src/preview_depth.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.i
-.PHONY : src/preview_depth.cpp.i
+src/camera_integration.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.i
+.PHONY : src/camera_integration.cpp.i
 
-src/preview_depth.s: src/preview_depth.cpp.s
-.PHONY : src/preview_depth.s
+src/camera_integration.s: src/camera_integration.cpp.s
+.PHONY : src/camera_integration.s
 
 # target to generate assembly for a file
-src/preview_depth.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/preview_depth.dir/build.make CMakeFiles/preview_depth.dir/src/preview_depth.cpp.s
-.PHONY : src/preview_depth.cpp.s
+src/camera_integration.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.s
+.PHONY : src/camera_integration.cpp.s
 
 # Help Target
 help:
@@ -198,14 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... detector"
-	@echo "... preview_depth"
-	@echo "... object_detection_yolo.o"
-	@echo "... object_detection_yolo.i"
-	@echo "... object_detection_yolo.s"
-	@echo "... src/preview_depth.o"
-	@echo "... src/preview_depth.i"
-	@echo "... src/preview_depth.s"
+	@echo "... VisionApp"
+	@echo "... src/camera_integration.o"
+	@echo "... src/camera_integration.i"
+	@echo "... src/camera_integration.s"
 .PHONY : help
 
 

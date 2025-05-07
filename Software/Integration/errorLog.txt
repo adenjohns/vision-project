@@ -1,0 +1,27 @@
+vision-rpi@raspberrypi:~/Desktop/vision-project/Software/Integration/build $ make
+[ 50%] Building CXX object CMakeFiles/VisionApp.dir/src/camera_integration.cpp.o
+In file included from /usr/include/c++/12/bits/move.h:57,
+                 from /usr/include/c++/12/bits/atomic_base.h:38,
+                 from /usr/include/c++/12/atomic:41,
+                 from /usr/include/ArducamTOFCamera.hpp:4,
+                 from /home/vision-rpi/Desktop/vision-project/Software/Integration/src/camera_integration.cpp:1:
+/usr/include/c++/12/type_traits: In instantiation of ‘struct std::is_convertible<const char (*)[1], const std::__cxx11::basic_string<char>*>’:
+/usr/include/c++/12/type_traits:178:41:   required from ‘struct std::__not_<std::is_convertible<const char (*)[1], const std::__cxx11::basic_string<char>*> >’
+/usr/include/c++/12/type_traits:167:12:   required from ‘struct std::__and_<std::__not_<std::is_convertible<const char (*)[1], const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> >, std::__not_<std::is_convertible<const char (&)[1], const char*> > >’
+/usr/include/c++/12/type_traits:172:12:   required from ‘struct std::__and_<std::is_convertible<const char (&)[1], std::basic_string_view<char, std::char_traits<char> > >, std::__not_<std::is_convertible<const char (*)[1], const std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> >*> >, std::__not_<std::is_convertible<const char (&)[1], const char*> > >’
+/usr/include/c++/12/bits/basic_string.h:155:8:   required by substitution of ‘template<class _CharT, class _Traits, class _Alloc> template<class _Tp, class _Res> using _If_sv = std::enable_if_t<std::__and_<std::is_convertible<const _Tp&, std::basic_string_view<_CharT, _Traits> >, std::__not_<std::is_convertible<const _Tp*, const std::__cxx11::basic_string<_CharT, _Traits, _Alloc>*> >, std::__not_<std::is_convertible<const _Tp&, const _CharT*> > >::value, _Res> [with _Tp = char [1]; _Res = void; _CharT = char; _Traits = std::char_traits<char>; _Alloc = std::allocator<char>]’
+/usr/include/c++/12/bits/basic_string.h:783:30:   required by substitution of ‘template<class _Tp, class> std::__cxx11::basic_string<char>::basic_string(const _Tp&, const std::allocator<char>&) [with _Tp = char [1]; <template-parameter-1-2> = <missing>]’
+/usr/include/eigen3/Eigen/src/Core/IO.h:59:5:   required from here
+/usr/include/c++/12/type_traits:1482:12: internal compiler error: Segmentation fault
+ 1482 |     struct is_convertible
+      |            ^~~~~~~~~~~~~~
+0x7f93a2773f __libc_start_call_main
+	../sysdeps/nptl/libc_start_call_main.h:58
+0x7f93a27817 __libc_start_main_impl
+	../csu/libc-start.c:360
+Please submit a full bug report, with preprocessed source (by using -freport-bug).
+Please include the complete backtrace with any bug report.
+See <file:///usr/share/doc/gcc-12/README.Bugs> for instructions.
+make[2]: *** [CMakeFiles/VisionApp.dir/build.make:76: CMakeFiles/VisionApp.dir/src/camera_integration.cpp.o] Error 1
+make[1]: *** [CMakeFiles/Makefile2:83: CMakeFiles/VisionApp.dir/all] Error 2
+make: *** [Makefile:91: all] Error 2
