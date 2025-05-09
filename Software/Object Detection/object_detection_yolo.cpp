@@ -10,8 +10,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <chrono>
-#include <opencv2/core/ocl.hpp>  // Add OpenCL header
-#include <opencv2/optflow.hpp>  // Add optical flow header
+#include <opencv2/features2d.hpp>  // For ORB feature detection
 
 const char* keys =
 "{help h usage ? | | Usage examples: \n\t\t./object_detection_yolo.out --image=dog.jpg \n\t\t./object_detection_yolo.out --video=run_sm.mp4}"
@@ -40,6 +39,11 @@ vector<string> classes;
 // Add these global variables after the existing ones
 Mat prevFrame, prevGray;
 bool firstFrame = true;
+Ptr<ORB> orb = ORB::create();
+vector<KeyPoint> prevKeypoints;
+Mat prevDescriptors;
+float contentThreshold = 0.3;  // Threshold for content change
+int minFeatures = 10;  // Minimum number of features to consider
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
 void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& out);
@@ -114,7 +118,51 @@ void scale_coords(Size img1, Size img0, Rect &box) {
 }
 
 // Add this function before main()
+bool isContentKeyFrame(const Mat& currentFrame) {
+    if (firstFrame) {
+        firstFrame = false;
+        currentFrame.copyTo(prevFrame);
+        // Detect features in first frame
+        orb->detectAndCompute(prevFrame, noArray(), prevKeypoints, prevDescriptors);
+        return true;
+    }
+
+    // Detect features in current frame
+    vector<KeyPoint> currentKeypoints;
+    Mat currentDescriptors;
+    orb->detectAndCompute(currentFrame, noArray(), currentKeypoints, currentDescriptors);
+
+    // If not enough features, consider it a keyframe
+    if (currentKeypoints.size() < minFeatures || prevKeypoints.size() < minFeatures) {
+        currentFrame.copyTo(prevFrame);
+        prevKeypoints = currentKeypoints;
+        prevDescriptors = currentDescriptors;
+        return true;
+    }
+
+    // Match features between frames
+    BFMatcher matcher(NORM_HAMMING);
+    vector<DMatch> matches;
+    matcher.match(prevDescriptors, currentDescriptors, matches);
+
+    // Calculate match ratio
+    float matchRatio = float(matches.size()) / float(min(prevKeypoints.size(), currentKeypoints.size()));
+    
+    // Update previous frame data
+    currentFrame.copyTo(prevFrame);
+    prevKeypoints = currentKeypoints;
+    prevDescriptors = currentDescriptors;
+
+    // Return true if content change is significant
+    return matchRatio < contentThreshold;
+}
+
+// Modify isKeyFrame to use both motion and content
 bool isKeyFrame(const Mat& currentFrame) {
+    bool hasMotion = false;
+    bool hasContentChange = false;
+
+    // Check motion
     if (firstFrame) {
         firstFrame = false;
         currentFrame.copyTo(prevFrame);
@@ -125,51 +173,35 @@ bool isKeyFrame(const Mat& currentFrame) {
     Mat currentGray;
     cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
     
-    // Calculate absolute difference between frames
     Mat diff;
     absdiff(prevGray, currentGray, diff);
     
-    // Calculate mean difference
+    // For grayscale images, meanDiff[0] contains the average pixel difference
     Scalar meanDiff = mean(diff);
-    float motionScore = (meanDiff[0] + meanDiff[1] + meanDiff[2]) / 3.0;
+    float motionScore = meanDiff[0];  // Just use the first channel for grayscale
     
     // Adjust frame skip based on motion intensity
     if (motionScore > motionThreshold) {
         currentFrameSkip = minFrameSkip;  // Process more frames when motion is high
+        hasMotion = true;
     } else {
         currentFrameSkip = maxFrameSkip;  // Skip more frames when motion is low
+        hasMotion = false;
     }
-    
+
+    // Check content change
+    hasContentChange = isContentKeyFrame(currentFrame);
+
     // Update previous frame
     currentFrame.copyTo(prevFrame);
     currentGray.copyTo(prevGray);
-    
-    return motionScore > motionThreshold;
+
+    // Return true if either motion or content change is significant
+    return hasMotion || hasContentChange;
 }
 
 int main(int argc, char** argv)
 {
-    // Check OpenCL availability
-    bool haveOpenCL = cv::ocl::haveOpenCL();
-    bool useOpenCL = false;
-    
-    if (haveOpenCL) {
-        cv::ocl::Context context;
-        if (context.create(cv::ocl::Device::TYPE_GPU)) {
-            cout << "OpenCL GPU context created successfully" << endl;
-            cv::ocl::Device device = context.device(0);
-            cout << "OpenCL device: " << device.name() << endl;
-            useOpenCL = true;
-        } else {
-            cout << "OpenCL GPU context creation failed" << endl;
-        }
-    } else {
-        cout << "OpenCL not available" << endl;
-    }
-
-    // Enable OpenCL if available
-    cv::ocl::setUseOpenCL(useOpenCL);
-    
     // Pre-allocate memory buffers
     cv::Mat frame_buffer(inpHeight, inpWidth, CV_8UC3);
     cv::Mat blob_buffer(1, inpWidth * inpHeight * 3, CV_32F);
@@ -190,30 +222,14 @@ int main(int argc, char** argv)
     
     // Give the configuration and weight files for the model
     String modelConfiguration = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/cfg/yolov3-tiny.cfg";
-    // String modelWeights = "/home/omair/workspace/CNN/hazen.ai/ultralytics/yolov3/weights/latest_retail.weights";
     String modelWeights = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/weights/yolov3-tiny.weights";
 
-    // Load the network with optimized settings
+    // Load the network
     Net net = readNetFromDarknet(modelConfiguration, modelWeights);
     
-    // Try to use OpenCL backend if available
-    if (useOpenCL) {
-        cout << "Attempting to use OpenCL backend..." << endl;
-        try {
-            net.setPreferableBackend(DNN_BACKEND_OPENCV);
-            net.setPreferableTarget(DNN_TARGET_OPENCL);
-            cout << "Successfully set OpenCL backend and target" << endl;
-        } catch (const cv::Exception& e) {
-            cout << "Failed to set OpenCL backend/target: " << e.what() << endl;
-            cout << "Falling back to CPU" << endl;
-            net.setPreferableBackend(DNN_BACKEND_OPENCV);
-            net.setPreferableTarget(DNN_TARGET_CPU);
-            useOpenCL = false;
-        }
-    } else {
-        net.setPreferableBackend(DNN_BACKEND_OPENCV);
-        net.setPreferableTarget(DNN_TARGET_CPU);
-    }
+    // Set CPU as backend
+    net.setPreferableBackend(DNN_BACKEND_OPENCV);
+    net.setPreferableTarget(DNN_TARGET_CPU);
     
     // Open a video file or an image file or a camera stream.
     string str, outputFile;
