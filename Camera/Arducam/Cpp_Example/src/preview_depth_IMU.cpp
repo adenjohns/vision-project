@@ -19,6 +19,8 @@
 #include <algorithm> 
 #include <thread>
 
+// Include the I2S audio feedback header
+#include "audio_feedback_i2s.h"
 
 // Flag to control IMU program execution
 volatile bool running = true;
@@ -284,10 +286,10 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
 
 int main()
 {
-    // Initialize audio feedback
-    AudioFeedback audio;
+    // Initialize I2S audio feedback
+    AudioFeedbackI2S audio("hw:0,0");  // Specify your I2S device, check with 'aplay -L'
     if (!audio.initialize()) {
-        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        std::cerr << "Failed to initialize I2S audio feedback" << std::endl;
         return -1;
     }
     
@@ -348,113 +350,6 @@ int main()
     // IMU SETUP END
     // ###########################################################################################################
     
-    // ###########################################################################################################
-    // AUDIO FEEDBACK START
-    // ###########################################################################################################
-
-// Audio parameters
-const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
-const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
-const int AUDIO_FREQ = 1000;    // Base frequency in Hz
-const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
-const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
-
-
-class AudioFeedback {
-private:
-    int leftPin;
-    int rightPin;
-    bool initialized;
-
-public:
-    AudioFeedback(int leftPin = AUDIO_PIN_LEFT, int rightPin = AUDIO_PIN_RIGHT)
-        : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
-
-    bool initialize() {
-        if (gpioInitialise() < 0) {
-            std::cerr << "Failed to initialize pigpio" << std::endl;
-            return false;
-        }
-
-        // Set pins as output
-        gpioSetMode(leftPin, PI_OUTPUT);
-        gpioSetMode(rightPin, PI_OUTPUT);
-
-        // Set PWM frequency
-        gpioSetPWMfrequency(leftPin, AUDIO_FREQ);
-        gpioSetPWMfrequency(rightPin, AUDIO_FREQ);
-
-        // Set PWM range
-        gpioSetPWMrange(leftPin, AUDIO_RANGE);
-        gpioSetPWMrange(rightPin, AUDIO_RANGE);
-
-        initialized = true;
-        return true;
-    }
-
-    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
-        if (!initialized) {
-            std::cerr << "AudioFeedback not initialized" << std::endl;
-            return;
-        }
-
-        // If no gaps found, play base volume on both speakers
-        if (gaps.empty()) {
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, BASE_VOLUME);
-            return;
-        }
-
-        // Find the largest gap (most likely path)
-        const Gap& mainGap = gaps[0];
-        
-        // Calculate the center of the gap
-        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
-        
-        // Calculate the center of the image
-        float imageCenter = imageWidth / 2.0f;
-        
-        // Calculate distance from center (normalized to [0, 1])
-        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
-        
-        // Calculate volume based on distance from center
-        // The farther from center, the louder the volume
-        int maxVolume = AUDIO_RANGE;
-        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
-        
-        // Set volumes based on which side of center the gap is
-        if (gapCenter < imageCenter) {
-            // Gap is on the left side
-            gpioPWM(leftPin, volume);
-            gpioPWM(rightPin, BASE_VOLUME);
-        } else {
-            // Gap is on the right side
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, volume);
-        }
-    }
-
-    void stop() {
-        if (initialized) {
-            gpioPWM(leftPin, 0);
-            gpioPWM(rightPin, 0);
-            gpioTerminate();
-            initialized = false;
-        }
-    }
-
-    ~AudioFeedback() {
-        stop();
-    }
-};
-
-
-
-    
-    // ###########################################################################################################
-    // AUDIO FEEDBACK END
-    // ###########################################################################################################
-
     // ###########################################################################################################
     // ARDUCAM SETUP 
     // ###########################################################################################################
@@ -565,9 +460,6 @@ public:
         // Wait a bit - using gpioDelay for more precise timing
         gpioDelay(100000); // 100ms (can be changed depending on desired sampling rate)
 
-
-
-
         Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr)
@@ -632,7 +524,7 @@ public:
 
         auto gaps = find_largest_gaps(data_indices, 2);
         
-        // Update audio feedback based on the gaps
+        // Update I2S audio feedback based on the gaps
         audio.updateAudio(gaps, format.width);
         
         if (gaps.empty()) 
