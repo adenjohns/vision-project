@@ -117,41 +117,41 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named VisionApp
+# Target rules for targets named detector
 
 # Build rule for target.
-VisionApp: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 VisionApp
-.PHONY : VisionApp
+detector: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 detector
+.PHONY : detector
 
 # fast build rule for target.
-VisionApp/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/build
-.PHONY : VisionApp/fast
+detector/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/build
+.PHONY : detector/fast
 
-src/camera_integration.o: src/camera_integration.cpp.o
-.PHONY : src/camera_integration.o
+src/object_detection_save_frame.o: src/object_detection_save_frame.cpp.o
+.PHONY : src/object_detection_save_frame.o
 
 # target to build an object file
-src/camera_integration.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.o
-.PHONY : src/camera_integration.cpp.o
+src/object_detection_save_frame.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o
+.PHONY : src/object_detection_save_frame.cpp.o
 
-src/camera_integration.i: src/camera_integration.cpp.i
-.PHONY : src/camera_integration.i
+src/object_detection_save_frame.i: src/object_detection_save_frame.cpp.i
+.PHONY : src/object_detection_save_frame.i
 
 # target to preprocess a source file
-src/camera_integration.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.i
-.PHONY : src/camera_integration.cpp.i
+src/object_detection_save_frame.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.i
+.PHONY : src/object_detection_save_frame.cpp.i
 
-src/camera_integration.s: src/camera_integration.cpp.s
-.PHONY : src/camera_integration.s
+src/object_detection_save_frame.s: src/object_detection_save_frame.cpp.s
+.PHONY : src/object_detection_save_frame.s
 
 # target to generate assembly for a file
-src/camera_integration.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/src/camera_integration.cpp.s
-.PHONY : src/camera_integration.cpp.s
+src/object_detection_save_frame.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.s
+.PHONY : src/object_detection_save_frame.cpp.s
 
 # Help Target
 help:
@@ -161,10 +161,10 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... VisionApp"
-	@echo "... src/camera_integration.o"
-	@echo "... src/camera_integration.i"
-	@echo "... src/camera_integration.s"
+	@echo "... detector"
+	@echo "... src/object_detection_save_frame.o"
+	@echo "... src/object_detection_save_frame.i"
+	@echo "... src/object_detection_save_frame.s"
 .PHONY : help
 
 

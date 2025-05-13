@@ -1,0 +1,11 @@
+Bounding Box (absolute pixels :
+x: 7
+y: 22
+width: 89
+height: 66
+
+Bounding Box (relative to frame size):
+x_ratio: 0.0546875
+y_ratio: 0.229167
+width_ratio: 0.695312
+height_ratio: 0.6875

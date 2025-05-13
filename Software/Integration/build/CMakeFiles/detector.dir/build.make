@@ -69,28 +69,28 @@ include CMakeFiles/detector.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/detector.dir/flags.make
 
-CMakeFiles/detector.dir/object_detection_yolo.cpp.o: CMakeFiles/detector.dir/flags.make
-CMakeFiles/detector.dir/object_detection_yolo.cpp.o: /home/vision-rpi/Desktop/vision-project/Software/Integration/object_detection_yolo.cpp
-CMakeFiles/detector.dir/object_detection_yolo.cpp.o: CMakeFiles/detector.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/detector.dir/object_detection_yolo.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/detector.dir/object_detection_yolo.cpp.o -MF CMakeFiles/detector.dir/object_detection_yolo.cpp.o.d -o CMakeFiles/detector.dir/object_detection_yolo.cpp.o -c /home/vision-rpi/Desktop/vision-project/Software/Integration/object_detection_yolo.cpp
+CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o: CMakeFiles/detector.dir/flags.make
+CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o: /home/vision-rpi/Desktop/vision-project/Software/Integration/src/object_detection_save_frame.cpp
+CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o: CMakeFiles/detector.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o -MF CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o.d -o CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o -c /home/vision-rpi/Desktop/vision-project/Software/Integration/src/object_detection_save_frame.cpp
 
-CMakeFiles/detector.dir/object_detection_yolo.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/detector.dir/object_detection_yolo.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision-rpi/Desktop/vision-project/Software/Integration/object_detection_yolo.cpp > CMakeFiles/detector.dir/object_detection_yolo.cpp.i
+CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/vision-rpi/Desktop/vision-project/Software/Integration/src/object_detection_save_frame.cpp > CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.i
 
-CMakeFiles/detector.dir/object_detection_yolo.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/detector.dir/object_detection_yolo.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision-rpi/Desktop/vision-project/Software/Integration/object_detection_yolo.cpp -o CMakeFiles/detector.dir/object_detection_yolo.cpp.s
+CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/vision-rpi/Desktop/vision-project/Software/Integration/src/object_detection_save_frame.cpp -o CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.s
 
 # Object files for target detector
 detector_OBJECTS = \
-"CMakeFiles/detector.dir/object_detection_yolo.cpp.o"
+"CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o"
 
 # External object files for target detector
 detector_EXTERNAL_OBJECTS =
 
-detector: CMakeFiles/detector.dir/object_detection_yolo.cpp.o
+detector: CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o
 detector: CMakeFiles/detector.dir/build.make
 detector: /usr/lib/aarch64-linux-gnu/libopencv_stitching.so.4.6.0
 detector: /usr/lib/aarch64-linux-gnu/libopencv_alphamat.so.4.6.0

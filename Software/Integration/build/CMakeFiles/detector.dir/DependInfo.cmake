@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/vision-rpi/Desktop/vision-project/Software/Integration/object_detection_yolo.cpp" "CMakeFiles/detector.dir/object_detection_yolo.cpp.o" "gcc" "CMakeFiles/detector.dir/object_detection_yolo.cpp.o.d"
+  "/home/vision-rpi/Desktop/vision-project/Software/Integration/src/object_detection_save_frame.cpp" "CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o" "gcc" "CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o.d"
   )
 
 # Targets to which this target links.

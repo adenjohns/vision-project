@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/detector.dir/object_detection_yolo.cpp.o"
-  "CMakeFiles/detector.dir/object_detection_yolo.cpp.o.d"
+  "CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o"
+  "CMakeFiles/detector.dir/src/object_detection_save_frame.cpp.o.d"
   "detector"
   "detector.pdb"
 )

@@ -29,10 +29,14 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # set(CMAKE_CXX_FLAGS "-g -std=c++11")
 
 # Add executable from src/ folder 
-add_executable(VisionApp src/camera_integration.cpp ) 
-target_link_libraries(VisionApp ${CXXLIBS} ${OpenCV_LIBS})
 
-	#add_executable( detector object_detection_yolo.cpp )
+#add_executable(VisionApp src/camera_integration.cpp ) 
+#target_link_libraries(VisionApp ${CXXLIBS} ${OpenCV_LIBS})
+
+add_executable( detector src/object_detection_save_frame.cpp )
+target_link_libraries(detector  ${OpenCV_LIBS} )
+	
+	#add_executable( detector src/object_detection_yolo.cpp )
 	#target_link_libraries(detector  ${OpenCV_LIBS} )
 
 	#add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 

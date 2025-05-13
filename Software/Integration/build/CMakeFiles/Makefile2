@@ -63,7 +63,7 @@ CMAKE_BINARY_DIR = /home/vision-rpi/Desktop/vision-project/Software/Integration/
 # Directory level rules for the build root directory
 
 # The main recursive "all" target.
-all: CMakeFiles/VisionApp.dir/all
+all: CMakeFiles/detector.dir/all
 .PHONY : all
 
 # The main recursive "preinstall" target.
@@ -71,34 +71,34 @@ preinstall:
 .PHONY : preinstall
 
 # The main recursive "clean" target.
-clean: CMakeFiles/VisionApp.dir/clean
+clean: CMakeFiles/detector.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/VisionApp.dir
+# Target rules for target CMakeFiles/detector.dir
 
 # All Build rule for target.
-CMakeFiles/VisionApp.dir/all:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/depend
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=1,2 "Built target VisionApp"
-.PHONY : CMakeFiles/VisionApp.dir/all
+CMakeFiles/detector.dir/all:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/depend
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles --progress-num=1,2 "Built target detector"
+.PHONY : CMakeFiles/detector.dir/all
 
 # Build rule for subdir invocation for target.
-CMakeFiles/VisionApp.dir/rule: cmake_check_build_system
+CMakeFiles/detector.dir/rule: cmake_check_build_system
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 2
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/VisionApp.dir/all
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/detector.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/vision-rpi/Desktop/vision-project/Software/Integration/build/CMakeFiles 0
-.PHONY : CMakeFiles/VisionApp.dir/rule
+.PHONY : CMakeFiles/detector.dir/rule
 
 # Convenience name for target.
-VisionApp: CMakeFiles/VisionApp.dir/rule
-.PHONY : VisionApp
+detector: CMakeFiles/detector.dir/rule
+.PHONY : detector
 
 # clean rule for target.
-CMakeFiles/VisionApp.dir/clean:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/VisionApp.dir/build.make CMakeFiles/VisionApp.dir/clean
-.PHONY : CMakeFiles/VisionApp.dir/clean
+CMakeFiles/detector.dir/clean:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/detector.dir/build.make CMakeFiles/detector.dir/clean
+.PHONY : CMakeFiles/detector.dir/clean
 
 #=============================================================================
 # Special targets to cleanup operation of make.
