@@ -10,6 +10,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/highgui.hpp>
 #include <chrono>
+#include <opencv2/features2d.hpp>  // For ORB feature detection
 
 const char* keys =
 "{help h usage ? | | Usage examples: \n\t\t./object_detection_yolo.out --image=dog.jpg \n\t\t./object_detection_yolo.out --video=run_sm.mp4}"
@@ -23,16 +24,26 @@ using namespace std;
 using namespace std::chrono;
 
 // Initialize the parameters
-float confThreshold = 0.3; // Confidence threshold
-float nmsThreshold = 0.5;  // Non-maximum suppression threshold
-// int inpWidth = 320; // 416;  // Width of network's input image
-// int inpHeight = 240; // 416; // Height of network's input image
-int inpWidth = 128;  // Reduced from 320 to 160 for faster processing
-int inpHeight = 96; // Reduced from 240 to 120 for faster processing
-int frameSkip = 4;   // Process every 3rd frame (increased from 2)
+float confThreshold = 0.4; // Confidence threshold
+float nmsThreshold = 0.3;  // Non-maximum suppression threshold
+float motionThreshold = 0.5;  // Motion detection threshold
+int inpWidth = 128;  // Reduced from 128 for faster processing
+int inpHeight = 96; // Reduced from 96 for faster processing
+int minFrameSkip = 2;  // Minimum frames to skip
+int maxFrameSkip = 4;  // Maximum frames to skip
+int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
 vector<string> classes;
+
+// Add these global variables after the existing ones
+Mat prevFrame, prevGray;
+bool firstFrame = true;
+Ptr<ORB> orb = ORB::create();
+vector<KeyPoint> prevKeypoints;
+Mat prevDescriptors;
+float contentThreshold = 0.3;  // Threshold for content change
+int minFeatures = 10;  // Minimum number of features to consider
 
 // Remove the bounding boxes with low confidence using non-maxima suppression
 void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& out);
@@ -106,8 +117,96 @@ void scale_coords(Size img1, Size img0, Rect &box) {
 
 }
 
+// Add this function before main()
+bool isContentKeyFrame(const Mat& currentFrame) {
+    if (firstFrame) {
+        firstFrame = false;
+        currentFrame.copyTo(prevFrame);
+        // Detect features in first frame
+        orb->detectAndCompute(prevFrame, noArray(), prevKeypoints, prevDescriptors);
+        return true;
+    }
+
+    // Detect features in current frame
+    vector<KeyPoint> currentKeypoints;
+    Mat currentDescriptors;
+    orb->detectAndCompute(currentFrame, noArray(), currentKeypoints, currentDescriptors);
+
+    // If not enough features, consider it a keyframe
+    if (currentKeypoints.size() < minFeatures || prevKeypoints.size() < minFeatures) {
+        currentFrame.copyTo(prevFrame);
+        prevKeypoints = currentKeypoints;
+        prevDescriptors = currentDescriptors;
+        return true;
+    }
+
+    // Match features between frames
+    BFMatcher matcher(NORM_HAMMING);
+    vector<DMatch> matches;
+    matcher.match(prevDescriptors, currentDescriptors, matches);
+
+    // Calculate match ratio
+    float matchRatio = float(matches.size()) / float(min(prevKeypoints.size(), currentKeypoints.size()));
+    
+    // Update previous frame data
+    currentFrame.copyTo(prevFrame);
+    prevKeypoints = currentKeypoints;
+    prevDescriptors = currentDescriptors;
+
+    // Return true if content change is significant
+    return matchRatio < contentThreshold;
+}
+
+// Modify isKeyFrame to use both motion and content
+bool isKeyFrame(const Mat& currentFrame) {
+    bool hasMotion = false;
+    bool hasContentChange = false;
+
+    // Check motion
+    if (firstFrame) {
+        firstFrame = false;
+        currentFrame.copyTo(prevFrame);
+        cvtColor(prevFrame, prevGray, COLOR_BGR2GRAY);
+        return true;
+    }
+
+    Mat currentGray;
+    cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
+    
+    Mat diff;
+    absdiff(prevGray, currentGray, diff);
+    
+    // For grayscale images, meanDiff[0] contains the average pixel difference
+    Scalar meanDiff = mean(diff);
+    float motionScore = meanDiff[0];  // Just use the first channel for grayscale
+    
+    // Adjust frame skip based on motion intensity
+    if (motionScore > motionThreshold) {
+        currentFrameSkip = minFrameSkip;  // Process more frames when motion is high
+        hasMotion = true;
+    } else {
+        currentFrameSkip = maxFrameSkip;  // Skip more frames when motion is low
+        hasMotion = false;
+    }
+
+    // Check content change
+    hasContentChange = isContentKeyFrame(currentFrame);
+
+    // Update previous frame
+    currentFrame.copyTo(prevFrame);
+    currentGray.copyTo(prevGray);
+
+    // Return true if either motion or content change is significant
+    return hasMotion || hasContentChange;
+}
+
 int main(int argc, char** argv)
 {
+    // Pre-allocate memory buffers
+    cv::Mat frame_buffer(inpHeight, inpWidth, CV_8UC3);
+    cv::Mat blob_buffer(1, inpWidth * inpHeight * 3, CV_32F);
+    cv::Mat display_buffer(inpHeight, inpWidth, CV_8UC3);
+    
     CommandLineParser parser(argc, argv, keys);
     parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
     if (parser.has("help"))
@@ -123,11 +222,12 @@ int main(int argc, char** argv)
     
     // Give the configuration and weight files for the model
     String modelConfiguration = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/cfg/yolov3-tiny.cfg";
-    // String modelWeights = "/home/omair/workspace/CNN/hazen.ai/ultralytics/yolov3/weights/latest_retail.weights";
     String modelWeights = "/home/vision-rpi/Desktop/Tiny-Yolov3-OpenCV-Cpp/weights/yolov3-tiny.weights";
 
-    // Load the network with optimized settings
+    // Load the network
     Net net = readNetFromDarknet(modelConfiguration, modelWeights);
+    
+    // Set CPU as backend
     net.setPreferableBackend(DNN_BACKEND_OPENCV);
     net.setPreferableTarget(DNN_TARGET_CPU);
     
@@ -185,19 +285,12 @@ int main(int argc, char** argv)
     // Process frames.
     while (waitKey(1) < 0)
     {
+        // Start timing for frame capture
+        auto capture_start = high_resolution_clock::now();
+        
         // get frame from the video
         cap >> frame;
         
-        // Skip frames more efficiently
-        frameCounter++;
-        skipFrame = (frameCounter % frameSkip != 0);
-        
-        if (skipFrame) {
-            // Just display the frame without processing
-            imshow(kWinName, frame);
-            continue;
-        }
-
         if (frame.empty()) {
             cout << "Done processing !!!" << endl;
             cout << "Output file is stored as " << outputFile << endl;
@@ -205,19 +298,65 @@ int main(int argc, char** argv)
             break;
         }
 
-        // Start timing for frame processing
-        auto start = high_resolution_clock::now();
-
-        // Create a 4D blob from a frame with reduced size
-        cv::cvtColor(frame, frame, COLOR_BGR2RGB);
-        oldframe = frame.clone();
-        sz = letterbox(frame, inpWidth);  // Use reduced input size
+        auto capture_end = high_resolution_clock::now();
+        auto capture_time = duration_cast<microseconds>(capture_end - capture_start).count();
         
-        // Create blob with reduced size
-        blobFromImage(frame, blob, 1/255.0, Size(inpWidth, sz.height), Scalar(0,0,0), true, false);
+        // Check if this is a keyframe based on motion
+        bool isKey = isKeyFrame(frame);
+        
+        // Use dynamic frame skipping
+        frameCounter++;
+        skipFrame = !isKey && (frameCounter % currentFrameSkip != 0);
+        
+        if (skipFrame) {
+            // Just display the frame without processing
+            auto display_start = high_resolution_clock::now();
+            
+            string label = format(
+                "Frame %d:\n"
+                "Display FPS: %.1f\n"
+                "Skip: %d\n"
+                "Motion: %s",
+                frameCounter,
+                1000000.0 / capture_time,
+                currentFrameSkip,
+                isKey ? "Yes" : "No"
+            );
+            
+            // Display on frame
+            int y = 15;
+            std::stringstream ss(label);
+            std::string line;
+            while (std::getline(ss, line)) {
+                putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+                y += 20;
+            }
+            
+            imshow(kWinName, frame);
+            
+            auto display_end = high_resolution_clock::now();
+            auto display_time = duration_cast<microseconds>(display_end - display_start).count();
+            
+            // Update statistics for skipped frames
+            alltimes += capture_time + display_time;
+            count += 1;
+            
+            continue;
+        }
+
+        // Start timing for YOLO processing
+        auto process_start = high_resolution_clock::now();
+
+        // Process frame with YOLO
+        // Use pre-allocated buffers
+        cv::resize(frame, frame_buffer, cv::Size(inpWidth, inpHeight));
+        cv::cvtColor(frame_buffer, frame_buffer, COLOR_BGR2RGB);
+        
+        // Create blob using pre-allocated buffer
+        blobFromImage(frame_buffer, blob_buffer, 1/255.0, Size(inpWidth, inpHeight), Scalar(0,0,0), true, false);
         
         // Set input and run forward pass
-        net.setInput(blob);
+        net.setInput(blob_buffer);
         
         // Time the forward pass
         auto forward_start = high_resolution_clock::now();
@@ -225,41 +364,32 @@ int main(int argc, char** argv)
         net.forward(outs, getOutputsNames(net));
         auto forward_end = high_resolution_clock::now();
         
-        // Remove the bounding boxes with low confidence
-        postprocess(frame, oldframe, outs);
+        // Process detections
+        postprocess(frame_buffer, frame_buffer, outs);
         
-        // End timing for frame processing
-        auto end = high_resolution_clock::now();
+        // End timing for YOLO processing
+        auto process_end = high_resolution_clock::now();
+        auto process_time = duration_cast<microseconds>(process_end - process_start).count();
         
         // Calculate timing information
-        auto total_duration = duration_cast<microseconds>(end - start).count();
-        auto forward_duration = duration_cast<microseconds>(forward_end - forward_start).count();
-        
-        // Get network performance profile
-        vector<double> layersTimes;
-        double freq = getTickFrequency() / 1000;
-        double t = net.getPerfProfile(layersTimes) / freq;
+        auto total_time = capture_time + process_time;
         
         // Update statistics
-        if (!skipFrame) {
-            alltimes += total_duration;
-            count += 1;
-        }
+        alltimes += total_time;
+        count += 1;
         
         // Display timing information
         string label = format(
             "Frame %d:\n"
-            "Total: %.1f ms\n"
-            "Forward: %.1f ms\n"
-            "Network: %.1f ms\n"
-            "FPS: %.1f\n"
-            "Skip: %d",
+            "Display FPS: %.1f\n"
+            "Process FPS: %.1f\n"
+            "Total Time: %.1f ms\n"
+            "Motion: %s",
             frameCounter,
-            total_duration/1000.0,
-            forward_duration/1000.0,
-            t,
-            1000000.0/total_duration,
-            frameSkip
+            1000000.0 / capture_time,
+            1000000.0 / process_time,
+            total_time / 1000.0,
+            isKey ? "Yes" : "No"
         );
         
         // Print to console
@@ -270,18 +400,16 @@ int main(int argc, char** argv)
         std::stringstream ss(label);
         std::string line;
         while (std::getline(ss, line)) {
-            putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
+            putText(frame_buffer, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
             y += 20;
         }
         
         // Write the frame with the detection boxes
-        Mat detectedFrame;
-        frame.convertTo(detectedFrame, CV_8U);
-        cv::cvtColor(detectedFrame, detectedFrame, COLOR_RGB2BGR);
-        if (parser.has("image")) imwrite(outputFile, detectedFrame);
-        else if (!skipFrame) video.write(detectedFrame);
+        cv::cvtColor(frame_buffer, display_buffer, COLOR_RGB2BGR);
+        if (parser.has("image")) imwrite(outputFile, display_buffer);
+        else if (!skipFrame) video.write(display_buffer);
         
-        imshow(kWinName, frame);
+        imshow(kWinName, frame_buffer);
     }
     
     // Calculate and display final statistics
@@ -289,7 +417,7 @@ int main(int argc, char** argv)
     double effective_fps = 1000.0/mean_time;
     cout << "\n\nFinal Statistics:" << endl;
     cout << "MEAN TIME PER PROCESSED FRAME = " << mean_time << " ms" << endl;
-    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/frameSkip << endl;
+    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/currentFrameSkip << endl;
     cout << "TOTAL PROCESSED FRAMES = " << count << endl;
     
     cap.release();
