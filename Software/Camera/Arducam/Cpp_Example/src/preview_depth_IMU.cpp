@@ -19,6 +19,8 @@
 #include <algorithm> 
 #include <thread>
 
+// Include the I2S audio feedback header
+#include "audio_feedback_i2s.h"
 
 //ON EVERY LOGIN MUST FIRST RUN: xhost +SI:localuser:root 
 
@@ -284,8 +286,30 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
     }
 }
 
+<<<<<<< HEAD:Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
+int main()
+{
+    // Initialize I2S audio feedback
+    AudioFeedbackI2S audio("hw:0,0");  // Specify your I2S device, check with 'aplay -L'
+    if (!audio.initialize()) {
+        std::cerr << "Failed to initialize I2S audio feedback" << std::endl;
+        return -1;
+    }
+    
+    // ###########################################################################################################
+    // IMU SETUP 
+    // ###########################################################################################################
+    
+    // Register signal handler
+    signal(SIGINT, signalHandler);
+    std::cout << "Activating BNO055 Sensor using pigpio\n";
+    gpioInitialise();  // Initialize pigpio early
+=======
+>>>>>>> e090ec8440069961e23fb6f091505609313783d6:Software/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
 
     // ###########################################################################################################
+<<<<<<< HEAD:Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
+=======
     // AUDIO FEEDBACK START
     // ###########################################################################################################
 
@@ -465,6 +489,7 @@ int main()
 
 
     // ###########################################################################################################
+>>>>>>> e090ec8440069961e23fb6f091505609313783d6:Software/Camera/Arducam/Cpp_Example/src/preview_depth_IMU.cpp
     // ARDUCAM SETUP 
     // ###########################################################################################################
 
@@ -574,9 +599,6 @@ int main()
         // Wait a bit - using gpioDelay for more precise timing
         gpioDelay(100000); // 100ms (can be changed depending on desired sampling rate)
 
-
-
-
         Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr)
@@ -641,7 +663,7 @@ int main()
 
         auto gaps = find_largest_gaps(data_indices, 2);
         
-        // Update audio feedback based on the gaps
+        // Update I2S audio feedback based on the gaps
         audio.updateAudio(gaps, format.width);
         
         if (gaps.empty()) 
