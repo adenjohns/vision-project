@@ -26,9 +26,9 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-float motionThreshold = 0.5;  // Motion detection threshold
-int inpWidth = 64;  // Reduced from 128 for faster processing
-int inpHeight = 48; // Reduced from 96 for faster processing
+float motionThreshold = 1.5;  // Motion detection threshold
+int inpWidth = 224; // 240; // 416; // 64;  // Reduced from 128 for faster processing
+int inpHeight = 160; // 180; // 416; // 48; // Reduced from 96 for faster processing
 int minFrameSkip = 2;  // Minimum frames to skip
 int maxFrameSkip = 4;  // Maximum frames to skip
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
@@ -173,12 +173,16 @@ bool isKeyFrame(const Mat& currentFrame) {
     Mat currentGray;
     cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
     
+    GaussianBlur(prevGray, prevGray, Size(5, 5), 0);
+    GaussianBlur(currentGray, currentGray, Size(5, 5), 0);
+    
     Mat diff;
     absdiff(prevGray, currentGray, diff);
     
     // For grayscale images, meanDiff[0] contains the average pixel difference
     Scalar meanDiff = mean(diff);
     float motionScore = meanDiff[0];  // Just use the first channel for grayscale
+    cout << "Motion Score: " << motionScore << endl;
     
     // Adjust frame skip based on motion intensity
     if (motionScore > motionThreshold) {
