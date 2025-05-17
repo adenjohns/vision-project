@@ -18,6 +18,10 @@ include_directories(${EIGEN3_INCLUDE_DIRS})
 find_package(OpenCV REQUIRED)
 include_directories(${OpenCV_INCLUDE_DIRS})
 
+# ALSA for I2S audio
+find_package(ALSA REQUIRED)
+include_directories(${ALSA_INCLUDE_DIRS})
+
 # Include Directory
 include_directories(${PROJECT_SOURCE_DIR}/include)
 include_directories(${OpenCV_INCLUDE_DIRS} ${PROJECT_SOURCE_DIR}/include)
@@ -34,13 +38,13 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #target_link_libraries(VisionApp ${CXXLIBS} ${OpenCV_LIBS})
 
 add_executable( detector src/object_detection_save_frame.cpp )
-target_link_libraries(detector  ${OpenCV_LIBS} )
+target_link_libraries(detector ${OpenCV_LIBS})
 	
 	#add_executable( detector src/object_detection_yolo.cpp )
 	#target_link_libraries(detector  ${OpenCV_LIBS} )
 
-	#add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 
-	#target_link_libraries(preview_depth_IMU ${CXXLIBS} ${OpenCV_LIBS} ${PIGPIO_LIBS})
+	add_executable(preview_depth_IMU src/preview_depth_IMU.cpp src/RPI_BNO055.cpp) 
+	target_link_libraries(preview_depth_IMU ${CXXLIBS} ${OpenCV_LIBS} ${PIGPIO_LIBS} ${ALSA_LIBRARIES})
 
 	#add_executable(preview_depth src/preview_depth.cpp)
 	#target_link_libraries(preview_depth ${CXXLIBS} ${OpenCV_LIBS})

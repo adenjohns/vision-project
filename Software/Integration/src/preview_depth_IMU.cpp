@@ -19,6 +19,216 @@
 #include <algorithm> 
 #include <thread>
 
+// Add ALSA libraries for I2S audio
+#include <alsa/asoundlib.h>
+
+//install ALSA library: sudo apt-get install libasound2-dev
+
+// I2S audio feedback class implementation
+class AudioFeedbackI2S {
+private:
+    std::string device;
+    bool initialized;
+    
+    // ALSA PCM device handle
+    snd_pcm_t *pcm_handle;
+    
+    // PCM stream parameters
+    unsigned int sample_rate;
+    unsigned int channels;
+    snd_pcm_format_t format;
+    
+    // Tone generation parameters
+    double left_freq;
+    double right_freq;
+    double base_freq;
+    double max_freq;
+    int buffer_size;
+
+public:
+    AudioFeedbackI2S(const std::string& dev) 
+        : device(dev), initialized(false), pcm_handle(nullptr),
+          sample_rate(44100), channels(2), format(SND_PCM_FORMAT_S16_LE),
+          left_freq(400), right_freq(800), base_freq(200), max_freq(1200),
+          buffer_size(1024) {}
+
+    bool initialize() {
+        int err;
+        
+        // Open PCM device for playback
+        err = snd_pcm_open(&pcm_handle, device.c_str(), SND_PCM_STREAM_PLAYBACK, 0);
+        if (err < 0) {
+            std::cerr << "Unable to open PCM device: " << snd_strerror(err) << std::endl;
+            return false;
+        }
+        
+        // Allocate hardware parameters object
+        snd_pcm_hw_params_t *hw_params;
+        snd_pcm_hw_params_malloc(&hw_params);
+        
+        // Fill hw_params with default values
+        err = snd_pcm_hw_params_any(pcm_handle, hw_params);
+        if (err < 0) {
+            std::cerr << "Cannot configure this PCM device: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Set access type
+        err = snd_pcm_hw_params_set_access(pcm_handle, hw_params, SND_PCM_ACCESS_RW_INTERLEAVED);
+        if (err < 0) {
+            std::cerr << "Cannot set access type: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Set sample format
+        err = snd_pcm_hw_params_set_format(pcm_handle, hw_params, format);
+        if (err < 0) {
+            std::cerr << "Cannot set sample format: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Set sample rate
+        err = snd_pcm_hw_params_set_rate_near(pcm_handle, hw_params, &sample_rate, 0);
+        if (err < 0) {
+            std::cerr << "Cannot set sample rate: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Set number of channels
+        err = snd_pcm_hw_params_set_channels(pcm_handle, hw_params, channels);
+        if (err < 0) {
+            std::cerr << "Cannot set channel count: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Apply the hardware parameters
+        err = snd_pcm_hw_params(pcm_handle, hw_params);
+        if (err < 0) {
+            std::cerr << "Cannot set parameters: " << snd_strerror(err) << std::endl;
+            snd_pcm_hw_params_free(hw_params);
+            return false;
+        }
+        
+        // Free the hardware parameters
+        snd_pcm_hw_params_free(hw_params);
+        
+        // Prepare the PCM device
+        err = snd_pcm_prepare(pcm_handle);
+        if (err < 0) {
+            std::cerr << "Cannot prepare audio interface: " << snd_strerror(err) << std::endl;
+            return false;
+        }
+        
+        std::cout << "I2S audio initialized successfully on device: " << device << std::endl;
+        initialized = true;
+        return true;
+    }
+
+    // Generate stereo audio samples based on the frequencies for each channel
+    std::vector<int16_t> generateTones(double leftFreq, double rightFreq, double volume) {
+        std::vector<int16_t> buffer(buffer_size * channels);
+        double phase_left = 0;
+        double phase_right = 0;
+        
+        const double phase_increment_left = 2 * M_PI * leftFreq / sample_rate;
+        const double phase_increment_right = 2 * M_PI * rightFreq / sample_rate;
+        
+        for (int i = 0; i < buffer_size; i++) {
+            // Generate sine wave samples for left and right channels
+            buffer[i * 2] = static_cast<int16_t>(volume * 32767.0 * sin(phase_left));
+            buffer[i * 2 + 1] = static_cast<int16_t>(volume * 32767.0 * sin(phase_right));
+            
+            // Update the phases
+            phase_left += phase_increment_left;
+            if (phase_left >= 2 * M_PI) phase_left -= 2 * M_PI;
+            
+            phase_right += phase_increment_right;
+            if (phase_right >= 2 * M_PI) phase_right -= 2 * M_PI;
+        }
+        
+        return buffer;
+    }
+
+    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
+        if (!initialized) {
+            std::cerr << "AudioFeedbackI2S not initialized" << std::endl;
+            return;
+        }
+
+        // If no gaps found, play base frequency on both channels
+        if (gaps.empty()) {
+            std::cout << "I2S Audio: No path detected - playing base tone" << std::endl;
+            playTone(base_freq, base_freq, 0.3);
+            return;
+        }
+
+        // Find the largest gap (most likely path)
+        const Gap& mainGap = gaps[0];
+        
+        // Calculate the center of the gap
+        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
+        
+        // Calculate the center of the image
+        float imageCenter = imageWidth / 2.0f;
+        
+        // Calculate distance from center (normalized to [0, 1])
+        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
+        
+        // Scale the frequency based on the distance from center
+        double frequency = base_freq + distanceFromCenter * (max_freq - base_freq);
+        
+        // Determine if the gap is on the left or right and play the appropriate tone
+        if (gapCenter < imageCenter) {
+            // Gap is on the left side - higher volume on left channel
+            std::cout << "I2S Audio: Path on LEFT, distance: " << distanceFromCenter << std::endl;
+            playTone(frequency, base_freq, 0.5);
+        } else {
+            // Gap is on the right side - higher volume on right channel
+            std::cout << "I2S Audio: Path on RIGHT, distance: " << distanceFromCenter << std::endl;
+            playTone(base_freq, frequency, 0.5);
+        }
+    }
+
+    void playTone(double leftFreq, double rightFreq, double volume) {
+        if (!initialized) return;
+        
+        // Generate audio samples
+        std::vector<int16_t> buffer = generateTones(leftFreq, rightFreq, volume);
+        
+        // Write the generated samples to the PCM device
+        int err = snd_pcm_writei(pcm_handle, buffer.data(), buffer_size);
+        
+        if (err < 0) {
+            std::cerr << "Error writing to PCM device: " << snd_strerror(err) << std::endl;
+            // Try to recover from xrun (buffer underrun/overrun)
+            if (err == -EPIPE) {
+                err = snd_pcm_prepare(pcm_handle);
+                if (err < 0) {
+                    std::cerr << "Failed to recover from xrun: " << snd_strerror(err) << std::endl;
+                }
+            }
+        }
+    }
+
+    void stop() {
+        if (initialized && pcm_handle) {
+            snd_pcm_drain(pcm_handle);
+            snd_pcm_close(pcm_handle);
+            pcm_handle = nullptr;
+            initialized = false;
+            std::cout << "I2S audio stopped" << std::endl;
+        }
+    }
+
+    ~AudioFeedbackI2S() {
+        stop();
+    }
+};
 
 //ON EVERY LOGIN MUST FIRST RUN: xhost +SI:localuser:root 
 
@@ -284,124 +494,12 @@ void convertMatToEigen(cv::Mat& depth_mat, MatrixXd& depth_matrix)
     }
 }
 
-
-    // ###########################################################################################################
-    // AUDIO FEEDBACK START
-    // ###########################################################################################################
-
-// Audio parameters
-const int AUDIO_PIN_LEFT = 18;  // GPIO pin for left speaker
-const int AUDIO_PIN_RIGHT = 19; // GPIO pin for right speaker
-const int AUDIO_FREQ = 1000;    // Base frequency in Hz
-const int AUDIO_RANGE = 1000;   // PWM range (0-1000)
-const int BASE_VOLUME = 200;    // Base volume level (out of 1000)
-
-
-
-
-class AudioFeedback {
-private:
-    int leftPin;
-    int rightPin;
-    bool initialized;
-
-public:
-    AudioFeedback(int leftPin = AUDIO_PIN_LEFT, int rightPin = AUDIO_PIN_RIGHT)
-        : leftPin(leftPin), rightPin(rightPin), initialized(false) {}
-
-    bool initialize() {
-        if (gpioInitialise() < 0) {
-            std::cerr << "Failed to initialize pigpio" << std::endl;
-            return false;
-        }
-
-        // Set pins as output
-        gpioSetMode(leftPin, PI_OUTPUT);
-        gpioSetMode(rightPin, PI_OUTPUT);
-
-        // Set PWM frequency
-        gpioSetPWMfrequency(leftPin, AUDIO_FREQ);
-        gpioSetPWMfrequency(rightPin, AUDIO_FREQ);
-
-        // Set PWM range
-        gpioSetPWMrange(leftPin, AUDIO_RANGE);
-        gpioSetPWMrange(rightPin, AUDIO_RANGE);
-
-        initialized = true;
-        return true;
-    }
-
-    void updateAudio(const std::vector<Gap>& gaps, int imageWidth) {
-        if (!initialized) {
-            std::cerr << "AudioFeedback not initialized" << std::endl;
-            return;
-        }
-
-        // If no gaps found, play base volume on both speakers
-        if (gaps.empty()) {
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, BASE_VOLUME);
-            return;
-        }
-
-        // Find the largest gap (most likely path)
-        const Gap& mainGap = gaps[0];
-        
-        // Calculate the center of the gap
-        float gapCenter = (mainGap.start + mainGap.end) / 2.0f;
-        
-        // Calculate the center of the image
-        float imageCenter = imageWidth / 2.0f;
-        
-        // Calculate distance from center (normalized to [0, 1])
-        float distanceFromCenter = std::abs(gapCenter - imageCenter) / imageCenter;
-        
-        // Calculate volume based on distance from center
-        // The farther from center, the louder the volume
-        int maxVolume = AUDIO_RANGE;
-        int volume = BASE_VOLUME + static_cast<int>(distanceFromCenter * (maxVolume - BASE_VOLUME));
-        
-        // Set volumes based on which side of center the gap is
-        if (gapCenter < imageCenter) {
-            // Gap is on the left side
-            gpioPWM(leftPin, volume);
-            gpioPWM(rightPin, BASE_VOLUME);
-        } else {
-            // Gap is on the right side
-            gpioPWM(leftPin, BASE_VOLUME);
-            gpioPWM(rightPin, volume);
-        }
-    }
-
-    void stop() {
-        if (initialized) {
-            gpioPWM(leftPin, 0);
-            gpioPWM(rightPin, 0);
-            gpioTerminate();
-            initialized = false;
-        }
-    }
-
-    ~AudioFeedback() {
-        stop();
-    }
-};
-
-
-
-    
-    // ###########################################################################################################
-    // AUDIO FEEDBACK END
-    // ###########################################################################################################
-
-
 int main()
 {
-    gpioInitialise();
-    // Initialize audio feedback
-    AudioFeedback audio;
+    // Initialize I2S audio feedback
+    AudioFeedbackI2S audio("hw:0,0");  // Specify your I2S device, check with 'aplay -L'
     if (!audio.initialize()) {
-        std::cerr << "Failed to initialize audio feedback" << std::endl;
+        std::cerr << "Failed to initialize I2S audio feedback" << std::endl;
         return -1;
     }
     
@@ -462,8 +560,6 @@ int main()
     // IMU SETUP END
     // ###########################################################################################################
     
-
-
     // ###########################################################################################################
     // ARDUCAM SETUP 
     // ###########################################################################################################
@@ -574,9 +670,6 @@ int main()
         // Wait a bit - using gpioDelay for more precise timing
         gpioDelay(100000); // 100ms (can be changed depending on desired sampling rate)
 
-
-
-
         Arducam::FrameFormat format;
         frame = tof.requestFrame(200);
         if (frame == nullptr)
@@ -641,7 +734,7 @@ int main()
 
         auto gaps = find_largest_gaps(data_indices, 2);
         
-        // Update audio feedback based on the gaps
+        // Update I2S audio feedback based on the gaps
         audio.updateAudio(gaps, format.width);
         
         if (gaps.empty()) 
