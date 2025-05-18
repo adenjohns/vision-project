@@ -898,6 +898,131 @@
 				)
 			)
 		)
+		(symbol "SC1176_0_1"
+			(rectangle
+				(start 2.54 -31.75)
+				(end 5.842 -33.02)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(rectangle
+				(start 2.794 -32.258)
+				(end 5.588 -32.766)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(circle
+				(center 3.302 -35.433)
+				(radius 0.635)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 3.937 -35.433) (xy 4.572 -35.433) (xy 5.842 -34.163) (xy 6.477 -34.163)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 4.572 -35.433) (xy 5.207 -35.433) (xy 5.842 -36.703) (xy 7.112 -36.703)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 6.477 -34.163)
+				(radius 0.381)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start 7.366 -36.322)
+				(end 6.604 -37.084)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 7.747 -34.798) (xy 7.747 -36.068) (xy 9.017 -35.433) (xy 7.747 -34.798)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+		)
+		(symbol "SC1176_1_1"
+			(polyline
+				(pts
+					(xy 5.207 -35.433) (xy 7.747 -35.433)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(pin output line
+				(at 10.16 -40.64 90)
+				(length 2.54)
+				(name "USB_A"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number ""
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+		)
 		(embedded_fonts no)
 	)
 )

@@ -6,6 +6,7 @@
 	(property "Reference" "IC3"
 		(at -9.7415 1.5845 0)
 		(layer "F.SilkS")
+		(hide yes)
 		(uuid "a78e1a48-90cb-4060-a448-61d2fe32d9e8")
 		(effects
 			(font
@@ -50,46 +51,6 @@
 		)
 	)
 	(attr through_hole)
-	(fp_line
-		(start -7.9 -1.4)
-		(end -7.9 15.6)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "132d8879-ba67-4d4e-9063-70aad40297ea")
-	)
-	(fp_line
-		(start -7.9 15.6)
-		(end 24.1 15.6)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "007b54b3-ead4-464f-a632-29abf5e6a7e8")
-	)
-	(fp_line
-		(start 24.1 -1.4)
-		(end -7.9 -1.4)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "c2b7eeea-97ec-4822-9c77-43c38460050f")
-	)
-	(fp_line
-		(start 24.1 -1.4)
-		(end 24.1 15.6)
-		(stroke
-			(width 0.15)
-			(type solid)
-		)
-		(layer "F.SilkS")
-		(uuid "64107474-39dd-4510-aa45-8f8dda9ff5a7")
-	)
 	(pad "1" thru_hole circle
 		(at -6.5 13.45)
 		(size 1.75 1.75)
