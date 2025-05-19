@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>
 
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
@@ -30,8 +31,8 @@ float nmsThreshold = 0.3;  // Non-maximum suppression threshold
 float motionThreshold = 1.5;  // Motion detection threshold (increased)
 int inpWidth = 224; // 64;  // Reduced from 128 for faster processing
 int inpHeight = 160; // 48; // Reduced from 96 for faster processing
-int minFrameSkip = 2;  // Minimum frames to skip
-int maxFrameSkip = 4;  // Maximum frames to skip
+int minFrameSkip = 3;  // Minimum frames to skip
+int maxFrameSkip = 5;  // Maximum frames to skip
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
@@ -213,6 +214,10 @@ int main(int argc, char** argv)
     cv::Mat blob_buffer(1, inpWidth * inpHeight * 3, CV_32F);
     cv::Mat display_buffer(inpHeight, inpWidth, CV_8UC3);
     
+    cv::setUseOptimized(true);
+    cv::setNumThreads(2);
+    
+    
     CommandLineParser parser(argc, argv, keys);
     parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
     if (parser.has("help"))
@@ -310,10 +315,16 @@ int main(int argc, char** argv)
         
         if (skipFrame) {
             // Just display the frame without processing
-            string label = format("Total FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
-                total_fps, total_fps, isKey ? "Yes" : "No");
-            putText(frame, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
+            //string label = format("Total FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
+                //total_fps, total_fps, isKey ? "Yes" : "No");
+            //putText(frame, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
             imshow(kWinName, frame);
+            
+            // Print FPS info to console
+            cout << "\rFrame " << frameCounter
+                 << " - Total FPS: " << fixed << setprecision(1) << total_fps
+                 << " - Motion: " << (isKey ? "Yes" : "No") << flush;
+                
             continue;
         }
 
@@ -351,11 +362,18 @@ int main(int argc, char** argv)
         
         // Calculate effective FPS
         double effective_fps = min(total_fps, process_fps * (processed_frames / total_frames));
+        // double effective_fps = (total_fps + process_fps) / 2.0;
         
         // Display timing information
-        string label = format("Total FPS: %.1f\nProcess FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
-            total_fps, process_fps, effective_fps, isKey ? "Yes" : "No");
-        putText(frame_buffer, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
+        //string label = format("Total FPS: %.1f\nProcess FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
+            //total_fps, process_fps, effective_fps, isKey ? "Yes" : "No");
+        //putText(frame_buffer, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
+        
+        cout << "\rFrame " << frameCounter
+             << " - Total FPS: " << fixed << setprecision(1) << total_fps
+             << " - Process FPS: " << fixed << setprecision(1) << process_fps
+             << " - Effective FPS: " << fixed << setprecision(1) << effective_fps
+             << " - Motion: " << (isKey ? "Yes" : "No") << flush;
         
         // Write the frame with the detection boxes
         cv::cvtColor(frame_buffer, display_buffer, COLOR_RGB2BGR);
