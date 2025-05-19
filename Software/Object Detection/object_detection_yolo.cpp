@@ -5,7 +5,6 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
-#include <iomanip>
 
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
@@ -31,8 +30,8 @@ float nmsThreshold = 0.3;  // Non-maximum suppression threshold
 float motionThreshold = 1.5;  // Motion detection threshold (increased)
 int inpWidth = 224; // 64;  // Reduced from 128 for faster processing
 int inpHeight = 160; // 48; // Reduced from 96 for faster processing
-int minFrameSkip = 3;  // Minimum frames to skip
-int maxFrameSkip = 5;  // Maximum frames to skip
+int minFrameSkip = 2;  // Minimum frames to skip
+int maxFrameSkip = 4;  // Maximum frames to skip
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
@@ -47,7 +46,18 @@ Mat prevDescriptors;
 float contentThreshold = 0.3;  // Threshold for content change
 int minFeatures = 10;  // Minimum number of features to consider
 
-// Remove the bounding boxes with low confidence using non-maxima suppression
+// Define a struct to hold detection information
+struct Detection {
+    int classId;
+    float confidence;
+    Rect bbox;
+    string className;
+};
+
+// Global vector to store current frame detections
+vector<Detection> currentDetections;
+
+// Update function declaration
 void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& out);
 
 // Draw the predicted bounding box
@@ -214,10 +224,6 @@ int main(int argc, char** argv)
     cv::Mat blob_buffer(1, inpWidth * inpHeight * 3, CV_32F);
     cv::Mat display_buffer(inpHeight, inpWidth, CV_8UC3);
     
-    cv::setUseOptimized(true);
-    cv::setNumThreads(2);
-    
-    
     CommandLineParser parser(argc, argv, keys);
     parser.about("Use this script to run object detection using YOLO3 in OpenCV.");
     if (parser.has("help"))
@@ -315,16 +321,13 @@ int main(int argc, char** argv)
         
         if (skipFrame) {
             // Just display the frame without processing
-            //string label = format("Total FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
-                //total_fps, total_fps, isKey ? "Yes" : "No");
-            //putText(frame, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
             imshow(kWinName, frame);
             
-            // Print FPS info to console
-            cout << "\rFrame " << frameCounter
+            // Print FPS information to console
+            cout << "\rFrame " << frameCounter 
                  << " - Total FPS: " << fixed << setprecision(1) << total_fps
                  << " - Motion: " << (isKey ? "Yes" : "No") << flush;
-                
+            
             continue;
         }
 
@@ -351,6 +354,15 @@ int main(int argc, char** argv)
         // Process detections
         postprocess(frame_buffer, frame_buffer, outs);
         
+        // Print detection information
+        for (const auto& det : currentDetections) {
+            cout << "Detection: class=" << det.classId
+                 << " conf=" << fixed << setprecision(2) << det.confidence
+                 << " bbox=(" << det.bbox.x << "," << det.bbox.y
+                 << "," << det.bbox.width << "," << det.bbox.height
+                 << ")" << endl;
+        }
+        
         // End timing for YOLO processing
         auto process_end = high_resolution_clock::now();
         auto process_time = duration_cast<microseconds>(process_end - process_start).count();
@@ -362,14 +374,9 @@ int main(int argc, char** argv)
         
         // Calculate effective FPS
         double effective_fps = min(total_fps, process_fps * (processed_frames / total_frames));
-        // double effective_fps = (total_fps + process_fps) / 2.0;
         
-        // Display timing information
-        //string label = format("Total FPS: %.1f\nProcess FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
-            //total_fps, process_fps, effective_fps, isKey ? "Yes" : "No");
-        //putText(frame_buffer, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
-        
-        cout << "\rFrame " << frameCounter
+        // Print FPS information to console
+        cout << "\rFrame " << frameCounter 
              << " - Total FPS: " << fixed << setprecision(1) << total_fps
              << " - Process FPS: " << fixed << setprecision(1) << process_fps
              << " - Effective FPS: " << fixed << setprecision(1) << effective_fps
@@ -409,25 +416,24 @@ int main(int argc, char** argv)
     return 0;
 }
 
-// Remove the bounding boxes with low confidence using non-maxima suppression
-void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& outs)
+// Update postprocess function
+void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& out)
 {
     vector<int> classIds;
     vector<float> confidences;
     vector<Rect> boxes;
     
-    for (size_t i = 0; i < outs.size(); ++i)
+    // Clear previous detections
+    currentDetections.clear();
+    
+    for (size_t i = 0; i < out.size(); ++i)
     {
-        // Scan through all the bounding boxes output from the network and keep only the
-        // ones with high confidence scores. Assign the box's class label as the class
-        // with the highest score for the box.
-        float* data = (float*)outs[i].data;
-        for (int j = 0; j < outs[i].rows; ++j, data += outs[i].cols)
+        float* data = (float*)out[i].data;
+        for (int j = 0; j < out[i].rows; ++j, data += out[i].cols)
         {
-            Mat scores = outs[i].row(j).colRange(5, outs[i].cols);
+            Mat scores = out[i].row(j).colRange(5, out[i].cols);
             Point classIdPoint;
             double confidence;
-            // Get the value and location of the maximum score
             minMaxLoc(scores, 0, &confidence, 0, &classIdPoint);
             if (confidence > confThreshold)
             {
@@ -437,45 +443,30 @@ void postprocess(Mat& frame, Mat& oldframe, const vector<Mat>& outs)
                 int height = (int)(data[3] * frame.rows);
                 int left = centerX - width / 2;
                 int top = centerY - height /2;
-                cout
-                << "Raw detection: class=" << classIdPoint.x
-                << " conf=" << confidence
-                << " bbox=[" << left << "," << top
-                << "," << width << "," << height << "]" << std::endl;
                 
                 classIds.push_back(classIdPoint.x);
                 confidences.push_back((float)confidence); 
                 boxes.push_back(Rect(left, top, width, height));
-                //boxes.push_back(newbox);
-                
             }
         }
     }
     
-    // Perform non maximum suppression to eliminate redundant overlapping boxes with
-    // lower confidences
     vector<int> indices;
     NMSBoxes(boxes, confidences, confThreshold, nmsThreshold, indices);
     for (size_t i = 0; i < indices.size(); ++i)
     {
         int idx = indices[i];
         Rect box = boxes[idx];
-        cout
-        << "Drawing box: class=" << classIds[idx]
-        << " conf=" << confidences[idx]
-        << " rect=(" << box.x <<","<< box.y
-        <<","<< box.width <<","<< box.height
-        <<")" << std::endl;
-        // box.width = box.x + box.width;
-        // box.height = box.y + box.height;
-
-        // cout<<"Before = " << box.x << " " << box.y << " " << box.width << " " << box.height << endl;
         
-        // scale_coords(frame.size(), oldframe.size(), box);
-        // cout<<"After = " << box.x << " " << box.y << " " << box.width << " " << box.height << endl;
+        // Create and store detection
+        Detection det;
+        det.classId = classIds[idx];
+        det.confidence = confidences[idx];
+        det.bbox = box;
+        det.className = classes[classIds[idx]];
+        currentDetections.push_back(det);
 
         drawPred(classIds[idx], confidences[idx], box.x, box.y, box.x + box.width, box.y + box.height, frame);
-        //drawPred(classIds[idx], confidences[idx], box.x, box.y, box.width, box.height, oldframe);
     }
 }
 
