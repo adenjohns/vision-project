@@ -17,6 +17,7 @@ const char* keys =
 "{image i        |<none>| input image   }"
 "{video v       |<none>| input video   }"
 "{device d         |0| input device index (for webcam) }"
+"{save-video s  | | save output video to file }"
 ;
 using namespace cv;
 using namespace dnn;
@@ -26,9 +27,9 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-float motionThreshold = 1.5;  // Motion detection threshold
-int inpWidth = 224; // 240; // 416; // 64;  // Reduced from 128 for faster processing
-int inpHeight = 160; // 180; // 416; // 48; // Reduced from 96 for faster processing
+float motionThreshold = 1.5;  // Motion detection threshold (increased)
+int inpWidth = 224; // 64;  // Reduced from 128 for faster processing
+int inpHeight = 160; // 48; // Reduced from 96 for faster processing
 int minFrameSkip = 2;  // Minimum frames to skip
 int maxFrameSkip = 4;  // Maximum frames to skip
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
@@ -173,6 +174,7 @@ bool isKeyFrame(const Mat& currentFrame) {
     Mat currentGray;
     cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
     
+    // Apply Gaussian Blur to reduce noise
     GaussianBlur(prevGray, prevGray, Size(5, 5), 0);
     GaussianBlur(currentGray, currentGray, Size(5, 5), 0);
     
@@ -182,7 +184,7 @@ bool isKeyFrame(const Mat& currentFrame) {
     // For grayscale images, meanDiff[0] contains the average pixel difference
     Scalar meanDiff = mean(diff);
     float motionScore = meanDiff[0];  // Just use the first channel for grayscale
-    cout << "Motion Score: " << motionScore << endl;
+    cout << "Motion Score: " << motionScore << endl; // Debug: Print motion score
     
     // Adjust frame skip based on motion intensity
     if (motionScore > motionThreshold) {
@@ -236,53 +238,40 @@ int main(int argc, char** argv)
     net.setPreferableTarget(DNN_TARGET_CPU);
     
     // Open a video file or an image file or a camera stream.
-    string str, outputFile;
+    string outputFile = "yolo_out_cpp.avi";
     VideoCapture cap;
     VideoWriter video;
     Mat frame, blob;
     
     try {
-        
-        outputFile = "yolo_out_cpp.avi";
-        if (parser.has("image"))
-        {
-            // Open the image file
-            str = parser.get<String>("image");
-            ifstream ifile(str);
-            if (!ifile) throw("error");
-            cap.open(str);
-            str.replace(str.end()-4, str.end(), "_yolo_out_cpp.jpg");
-            outputFile = str;
+        // Open the webcam
+        cap.open(parser.get<int>("device"));
+        if (!cap.isOpened()) {
+            throw runtime_error("Could not open webcam");
         }
-        else if (parser.has("video"))
-        {
-            // Open the video file
-            str = parser.get<String>("video");
-            ifstream ifile(str);
-            if (!ifile) throw("error");
-            cap.open(str);
-            str.replace(str.end()-4, str.end(), "_yolo_out_cpp.avi");
-            outputFile = str;
-        }
-        // Open the webcaom
-        else cap.open(parser.get<int>("device"));
-        
     }
-    catch(...) {
-        cout << "Could not open the input image/video stream" << endl;
+    catch(const exception& e) {
+        cout << "Error: " << e.what() << endl;
         return 0;
     }
     
-    // Get the video writer initialized to save the output video
-    if (!parser.has("image")) {
+    // Initialize video writer only if save-video flag is set
+    if (parser.has("save-video")) {
         video.open(outputFile, VideoWriter::fourcc('M','J','P','G'), 28, Size(cap.get(CAP_PROP_FRAME_WIDTH), cap.get(CAP_PROP_FRAME_HEIGHT)));
+        if (!video.isOpened()) {
+            cout << "Could not open video writer. Output will not be saved." << endl;
+        }
     }
     
     // Create a window
     static const string kWinName = "Deep learning object detection in OpenCV";
     namedWindow(kWinName, WINDOW_NORMAL);
-    double alltimes = 0.0;
-    double count = 0;
+    
+    // FPS tracking variables
+    double capture_times = 0.0;
+    double process_times = 0.0;
+    int total_frames = 0;
+    int processed_frames = 0;
     Mat oldframe;
     Size sz;
 
@@ -292,18 +281,25 @@ int main(int argc, char** argv)
         // Start timing for frame capture
         auto capture_start = high_resolution_clock::now();
         
-        // get frame from the video
+        // get frame from the video buffer
         cap >> frame;
         
         if (frame.empty()) {
             cout << "Done processing !!!" << endl;
-            cout << "Output file is stored as " << outputFile << endl;
+            if (parser.has("save-video")) {
+                cout << "Output file is stored as " << outputFile << endl;
+            }
             waitKey(3000);
             break;
         }
 
         auto capture_end = high_resolution_clock::now();
         auto capture_time = duration_cast<microseconds>(capture_end - capture_start).count();
+        capture_times += capture_time;
+        total_frames++;
+        
+        // Calculate total FPS (including skipped frames)
+        double total_fps = 1000000.0 / (capture_times / total_frames);
         
         // Check if this is a keyframe based on motion
         bool isKey = isKeyFrame(frame);
@@ -314,37 +310,10 @@ int main(int argc, char** argv)
         
         if (skipFrame) {
             // Just display the frame without processing
-            auto display_start = high_resolution_clock::now();
-            
-            string label = format(
-                "Frame %d:\n"
-                "Display FPS: %.1f\n"
-                "Skip: %d\n"
-                "Motion: %s",
-                frameCounter,
-                1000000.0 / capture_time,
-                currentFrameSkip,
-                isKey ? "Yes" : "No"
-            );
-            
-            // Display on frame
-            int y = 15;
-            std::stringstream ss(label);
-            std::string line;
-            while (std::getline(ss, line)) {
-                putText(frame, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-                y += 20;
-            }
-            
+            string label = format("Total FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
+                total_fps, total_fps, isKey ? "Yes" : "No");
+            putText(frame, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
             imshow(kWinName, frame);
-            
-            auto display_end = high_resolution_clock::now();
-            auto display_time = duration_cast<microseconds>(display_end - display_start).count();
-            
-            // Update statistics for skipped frames
-            alltimes += capture_time + display_time;
-            count += 1;
-            
             continue;
         }
 
@@ -374,58 +343,50 @@ int main(int argc, char** argv)
         // End timing for YOLO processing
         auto process_end = high_resolution_clock::now();
         auto process_time = duration_cast<microseconds>(process_end - process_start).count();
+        process_times += process_time;
+        processed_frames++;
         
-        // Calculate timing information
-        auto total_time = capture_time + process_time;
+        // Calculate process FPS
+        double process_fps = 1000000.0 / (process_times / processed_frames);
         
-        // Update statistics
-        alltimes += total_time;
-        count += 1;
+        // Calculate effective FPS
+        double effective_fps = min(total_fps, process_fps * (processed_frames / total_frames));
         
         // Display timing information
-        string label = format(
-            "Frame %d:\n"
-            "Display FPS: %.1f\n"
-            "Process FPS: %.1f\n"
-            "Total Time: %.1f ms\n"
-            "Motion: %s",
-            frameCounter,
-            1000000.0 / capture_time,
-            1000000.0 / process_time,
-            total_time / 1000.0,
-            isKey ? "Yes" : "No"
-        );
-        
-        // Print to console
-        cout << "\r" << label << flush;
-        
-        // Display on frame
-        int y = 15;
-        std::stringstream ss(label);
-        std::string line;
-        while (std::getline(ss, line)) {
-            putText(frame_buffer, line, Point(0, y), FONT_HERSHEY_SIMPLEX, 0.5, Scalar(0, 0, 255));
-            y += 20;
-        }
+        string label = format("Total FPS: %.1f\nProcess FPS: %.1f\nEffective FPS: %.1f\nMotion: %s", 
+            total_fps, process_fps, effective_fps, isKey ? "Yes" : "No");
+        putText(frame_buffer, label, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 0, 255));
         
         // Write the frame with the detection boxes
         cv::cvtColor(frame_buffer, display_buffer, COLOR_RGB2BGR);
-        if (parser.has("image")) imwrite(outputFile, display_buffer);
-        else if (!skipFrame) video.write(display_buffer);
+        if (parser.has("save-video") && video.isOpened()) {
+            video.write(display_buffer);
+        }
         
         imshow(kWinName, frame_buffer);
     }
     
     // Calculate and display final statistics
-    double mean_time = (alltimes/count)/1000.0;
-    double effective_fps = 1000.0/mean_time;
+    double mean_capture_time = (capture_times/total_frames)/1000.0;
+    double mean_process_time = (process_times/processed_frames)/1000.0;
+    double total_fps = 1000.0/mean_capture_time;
+    double process_fps = 1000.0/mean_process_time;
+    double effective_fps = min(total_fps, process_fps * (processed_frames / total_frames));
+    
     cout << "\n\nFinal Statistics:" << endl;
-    cout << "MEAN TIME PER PROCESSED FRAME = " << mean_time << " ms" << endl;
-    cout << "EFFECTIVE FPS (including skipped frames) = " << effective_fps/currentFrameSkip << endl;
-    cout << "TOTAL PROCESSED FRAMES = " << count << endl;
+    cout << "MEAN CAPTURE TIME PER FRAME = " << mean_capture_time << " ms" << endl;
+    cout << "MEAN PROCESS TIME PER FRAME = " << mean_process_time << " ms" << endl;
+    cout << "TOTAL FPS = " << total_fps << endl;
+    cout << "PROCESS FPS = " << process_fps << endl;
+    cout << "EFFECTIVE FPS = " << effective_fps << endl;
+    cout << "TOTAL FRAMES = " << total_frames << endl;
+    cout << "PROCESSED FRAMES = " << processed_frames << endl;
+    if (parser.has("save-video")) {
+        cout << "Output video saved as: " << outputFile << endl;
+    }
     
     cap.release();
-    if (!parser.has("image")) video.release();
+    if (parser.has("save-video")) video.release();
 
     return 0;
 }
