@@ -67,6 +67,7 @@
 		)
 		(property "Description_1" "The Raspberry Pi Zero 2 W SC1176 single board computer features a 1GHz quad-core Broadcom BCM2710A1 Arm Cortex-A53 processor and 512MB of RAM, making it a powerful solution for embedded computing applications. With 40 digital I/O lines and multiple expansion options including Bluetooth 4.2, BLE, HAT GPIO, and LAN, this SBC offers extensive connectivity and flexibility. Its compact size of 2.600 x 1.180 (66.04mm x 29.97mm) makes it ideal for space-constrained projects. Video outputs include Composite and HDMI, and it features a microSD storage interface and a USB 2.0 OTG port."
 			(at 0 0 0)
+			(do_not_autoplace)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -178,7 +179,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at -30.48 22.86 0)
+				(at -30.48 36.83 0)
 				(length 5.08)
 				(name "GPIO2/SDA1"
 					(effects
@@ -196,7 +197,7 @@
 				)
 			)
 			(pin bidirectional line
-				(at -30.48 20.32 0)
+				(at -30.48 34.29 0)
 				(length 5.08)
 				(name "GPIO3/SCL"
 					(effects
@@ -206,6 +207,96 @@
 					)
 				)
 				(number "5"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -30.48 31.75 0)
+				(length 5.08)
+				(name "3V3_17"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "17"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -30.48 29.21 0)
+				(length 5.08)
+				(name "3V3_1"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "1"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin power_in line
+				(at -30.48 26.67 0)
+				(length 5.08)
+				(name "5V_4"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "4"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -30.48 22.86 0)
+				(length 5.08)
+				(name "GPIO15/RXD0"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "10"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at -30.48 20.32 0)
+				(length 5.08)
+				(name "GPIO16"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "36"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -342,14 +433,14 @@
 			(pin bidirectional line
 				(at -30.48 0 0)
 				(length 5.08)
-				(name "GPIO11/SPI_SCLK"
+				(name "GPIO17/GPIO_GEN0"
 					(effects
 						(font
 							(size 1.016 1.016)
 						)
 					)
 				)
-				(number "23"
+				(number "11"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -411,42 +502,6 @@
 					)
 				)
 			)
-			(pin bidirectional line
-				(at -30.48 -12.7 0)
-				(length 5.08)
-				(name "ID_SD"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "27"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin bidirectional line
-				(at -30.48 -15.24 0)
-				(length 5.08)
-				(name "ID_SC"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "28"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
 			(pin power_in line
 				(at 30.48 35.56 180)
 				(length 5.08)
@@ -465,89 +520,17 @@
 					)
 				)
 			)
-			(pin power_in line
-				(at 30.48 33.02 180)
-				(length 5.08)
-				(name "5V_4"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "4"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin power_in line
-				(at 30.48 30.48 180)
-				(length 5.08)
-				(name "3V3_1"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "1"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin power_in line
-				(at 30.48 27.94 180)
-				(length 5.08)
-				(name "3V3_17"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "17"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin bidirectional line
-				(at 30.48 22.86 180)
-				(length 5.08)
-				(name "GPIO15/RXD0"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "10"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
 			(pin bidirectional line
 				(at 30.48 20.32 180)
 				(length 5.08)
-				(name "GPIO16"
+				(name "GPIO11/SPI_SCLK"
 					(effects
 						(font
 							(size 1.016 1.016)
 						)
 					)
 				)
-				(number "36"
+				(number "23"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -558,14 +541,14 @@
 			(pin bidirectional line
 				(at 30.48 17.78 180)
 				(length 5.08)
-				(name "GPIO17/GPIO_GEN0"
+				(name "GPIO25/GPIO_GEN6"
 					(effects
 						(font
 							(size 1.016 1.016)
 						)
 					)
 				)
-				(number "11"
+				(number "22"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -576,14 +559,14 @@
 			(pin bidirectional line
 				(at 30.48 15.24 180)
 				(length 5.08)
-				(name "GPIO18/GPIO_GEN1"
+				(name "GPIO19"
 					(effects
 						(font
 							(size 1.016 1.016)
 						)
 					)
 				)
-				(number "12"
+				(number "35"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -594,14 +577,14 @@
 			(pin bidirectional line
 				(at 30.48 12.7 180)
 				(length 5.08)
-				(name "GPIO19"
+				(name "GPIO18/GPIO_GEN1"
 					(effects
 						(font
 							(size 1.016 1.016)
 						)
 					)
 				)
-				(number "35"
+				(number "12"
 					(effects
 						(font
 							(size 1.016 1.016)
@@ -700,24 +683,6 @@
 				)
 			)
 			(pin bidirectional line
-				(at 30.48 -2.54 180)
-				(length 5.08)
-				(name "GPIO25/GPIO_GEN6"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-				(number "22"
-					(effects
-						(font
-							(size 1.016 1.016)
-						)
-					)
-				)
-			)
-			(pin bidirectional line
 				(at 30.48 -5.08 180)
 				(length 5.08)
 				(name "GPIO26"
@@ -746,6 +711,42 @@
 					)
 				)
 				(number "13"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 30.48 -11.43 180)
+				(length 5.08)
+				(name "ID_SD"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "27"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 30.48 -13.97 180)
+				(length 5.08)
+				(name "ID_SC"
+					(effects
+						(font
+							(size 1.016 1.016)
+						)
+					)
+				)
+				(number "28"
 					(effects
 						(font
 							(size 1.016 1.016)
