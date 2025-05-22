@@ -5,6 +5,7 @@
 #include <fstream>
 #include <sstream>
 #include <iostream>
+#include <iomanip>  // Add this for setprecision
 
 #include <opencv2/dnn.hpp>
 #include <opencv2/imgproc.hpp>
@@ -27,11 +28,11 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-float motionThreshold = 1.5;  // Motion detection threshold (increased)
-int inpWidth = 224; // 64;  // Reduced from 128 for faster processing
-int inpHeight = 160; // 48; // Reduced from 96 for faster processing
-int minFrameSkip = 2;  // Minimum frames to skip
-int maxFrameSkip = 4;  // Maximum frames to skip
+float motionThreshold = 2;  // Motion detection threshold
+int inpWidth = 128;  // Reduced from 224 for faster processing
+int inpHeight = 96;  // Reduced from 160 for faster processing
+int minFrameSkip = 3;  // Increased from 2
+int maxFrameSkip = 5;  // Increased from 4
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
@@ -40,7 +41,23 @@ vector<string> classes;
 // Add these global variables after the existing ones
 Mat prevFrame, prevGray;
 bool firstFrame = true;
-Ptr<ORB> orb = ORB::create();
+int orbMaxFeatures = 50;  // Reduced from 100 for faster processing
+float orbScaleFactor = 1.2f;  // Standard scale factor
+int orbLevels = 3;  // Reduced from 4 for faster processing
+int orbEdgeThreshold = 31;  // Standard edge threshold
+int orbPatchSize = 31;  // Standard patch size
+int orbFastThreshold = 30;  // Increased from 20 for faster processing
+Ptr<ORB> orb = ORB::create(
+    orbMaxFeatures,  // max features
+    orbScaleFactor,  // scale factor
+    orbLevels,       // pyramid levels
+    orbEdgeThreshold,// edge threshold
+    0,               // first level
+    2,               // WTA_K
+    ORB::HARRIS_SCORE,// score type
+    orbPatchSize,    // patch size
+    orbFastThreshold // FAST threshold
+);
 vector<KeyPoint> prevKeypoints;
 Mat prevDescriptors;
 float contentThreshold = 0.3;  // Threshold for content change
@@ -182,20 +199,25 @@ bool isKeyFrame(const Mat& currentFrame) {
         return true;
     }
 
+    // Resize input frame once and reuse
+    Mat resizedFrame;
+    resize(currentFrame, resizedFrame, Size(inpWidth, inpHeight), 0, 0, INTER_NEAREST);  // Using INTER_NEAREST for speed
+
+    // Convert to grayscale after resize (faster than resizing grayscale)
     Mat currentGray;
-    cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
+    cvtColor(resizedFrame, currentGray, COLOR_BGR2GRAY);
     
-    // Apply Gaussian Blur to reduce noise
-    GaussianBlur(prevGray, prevGray, Size(5, 5), 0);
-    GaussianBlur(currentGray, currentGray, Size(5, 5), 0);
+    // Resize previous frame if needed
+    if (prevGray.size() != Size(inpWidth, inpHeight)) {
+        resize(prevGray, prevGray, Size(inpWidth, inpHeight), 0, 0, INTER_NEAREST);
+    }
     
+    // Calculate motion
     Mat diff;
     absdiff(prevGray, currentGray, diff);
     
-    // For grayscale images, meanDiff[0] contains the average pixel difference
     Scalar meanDiff = mean(diff);
-    float motionScore = meanDiff[0];  // Just use the first channel for grayscale
-    cout << "Motion Score: " << motionScore << endl; // Debug: Print motion score
+    float motionScore = meanDiff[0];
     
     // Adjust frame skip based on motion intensity
     if (motionScore > motionThreshold) {
@@ -206,14 +228,13 @@ bool isKeyFrame(const Mat& currentFrame) {
         hasMotion = false;
     }
 
-    // Check content change
-    hasContentChange = isContentKeyFrame(currentFrame);
+    // Check content change using already resized frame
+    hasContentChange = isContentKeyFrame(resizedFrame);
 
     // Update previous frame
-    currentFrame.copyTo(prevFrame);
+    resizedFrame.copyTo(prevFrame);
     currentGray.copyTo(prevGray);
 
-    // Return true if either motion or content change is significant
     return hasMotion || hasContentChange;
 }
 
@@ -372,8 +393,9 @@ int main(int argc, char** argv)
         // Calculate process FPS
         double process_fps = 1000000.0 / (process_times / processed_frames);
         
-        // Calculate effective FPS
-        double effective_fps = min(total_fps, process_fps * (processed_frames / total_frames));
+        // Calculate effective FPS using floating-point division
+        double frame_ratio = static_cast<double>(processed_frames) / static_cast<double>(total_frames);
+        double effective_fps = min(total_fps, process_fps * frame_ratio);
         
         // Print FPS information to console
         cout << "\rFrame " << frameCounter 
