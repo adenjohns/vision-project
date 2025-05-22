@@ -28,7 +28,7 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-float motionThreshold = 2;  // Motion detection threshold
+float motionThreshold = 5;  // Motion detection threshold
 int inpWidth = 128;  // Reduced from 224 for faster processing
 int inpHeight = 96;  // Reduced from 160 for faster processing
 int minFrameSkip = 3;  // Increased from 2
@@ -375,27 +375,18 @@ int main(int argc, char** argv)
         // Process detections
         postprocess(frame_buffer, frame_buffer, outs);
         
-        // Print detection information
-        for (const auto& det : currentDetections) {
-            cout << "Detection: class=" << det.classId
-                 << " conf=" << fixed << setprecision(2) << det.confidence
-                 << " bbox=(" << det.bbox.x << "," << det.bbox.y
-                 << "," << det.bbox.width << "," << det.bbox.height
-                 << ")" << endl;
-        }
-        
         // End timing for YOLO processing
         auto process_end = high_resolution_clock::now();
         auto process_time = duration_cast<microseconds>(process_end - process_start).count();
         process_times += process_time;
         processed_frames++;
         
-        // Calculate process FPS
+        // Calculate process FPS (time per processed frame)
         double process_fps = 1000000.0 / (process_times / processed_frames);
         
-        // Calculate effective FPS using floating-point division
-        double frame_ratio = static_cast<double>(processed_frames) / static_cast<double>(total_frames);
-        double effective_fps = min(total_fps, process_fps * frame_ratio);
+        // Calculate effective FPS (total frames / total time including processing)
+        double total_time = (capture_times + process_times) / 1000000.0;  // Convert to seconds
+        double effective_fps = total_frames / total_time;
         
         // Print FPS information to console
         cout << "\rFrame " << frameCounter 
