@@ -6980,10 +6980,9 @@
 		(in_bom yes)
 		(on_board yes)
 		(dnp no)
-		(fields_autoplaced yes)
 		(uuid "d8638a44-09b2-4a8b-a44b-a8fc3d6c3f45")
 		(property "Reference" "RGBCamera1"
-			(at 161.29 157.4799 0)
+			(at 149.606 163.83 0)
 			(effects
 				(font
 					(size 1.27 1.27)
