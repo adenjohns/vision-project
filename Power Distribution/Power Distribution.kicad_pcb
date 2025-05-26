@@ -9,7 +9,7 @@
 	(paper "A4")
 	(title_block
 		(title "Protoype Power Distribution PCB Design")
-		(rev "V4.2")
+		(rev "V4.3")
 		(company "VISION")
 		(comment 1 "Yafi Thai")
 	)

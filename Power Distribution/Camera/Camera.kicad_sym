@@ -7,7 +7,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "ArducamToFCamera"
-			(at 0 0 0)
+			(at 4.064 0 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -52,7 +52,7 @@
 		(symbol "ArducamToFCam_0_1"
 			(rectangle
 				(start -5.08 -1.27)
-				(end 4.445 -6.35)
+				(end 16.51 -11.43)
 				(stroke
 					(width 0)
 					(type default)
@@ -61,8 +61,89 @@
 					(type none)
 				)
 			)
+			(circle
+				(center 12.573 -6.223)
+				(radius 0.381)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 13.208 -4.953) (xy 14.478 -4.953) (xy 13.843 -3.683) (xy 13.208 -4.953)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(polyline
+				(pts
+					(xy 13.843 -8.128) (xy 13.843 -7.493) (xy 15.113 -6.858) (xy 15.113 -5.588)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 13.843 -8.763) (xy 13.843 -8.128) (xy 12.573 -6.858) (xy 12.573 -6.223)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(circle
+				(center 13.843 -9.398)
+				(radius 0.635)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
+			(rectangle
+				(start 14.732 -5.334)
+				(end 15.494 -6.096)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type outline)
+				)
+			)
 		)
 		(symbol "ArducamToFCam_1_1"
+			(polyline
+				(pts
+					(xy 13.843 -7.493) (xy 13.843 -4.953)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
 			(pin input line
 				(at -7.62 -2.54 0)
 				(length 2.54)
@@ -92,6 +173,24 @@
 					)
 				)
 				(number "2"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+			)
+			(pin bidirectional line
+				(at 19.05 -2.54 180)
+				(length 2.54)
+				(name "CSI_Connection"
+					(effects
+						(font
+							(size 1.27 1.27)
+						)
+					)
+				)
+				(number ""
 					(effects
 						(font
 							(size 1.27 1.27)
