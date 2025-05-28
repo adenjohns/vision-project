@@ -28,11 +28,11 @@ using namespace std::chrono;
 // Initialize the parameters
 float confThreshold = 0.4; // Confidence threshold
 float nmsThreshold = 0.3;  // Non-maximum suppression threshold
-float motionThreshold = 5;  // Motion detection threshold
+float motionThreshold = 7;  // Motion detection threshold
 int inpWidth = 128;  // Reduced from 224 for faster processing
 int inpHeight = 96;  // Reduced from 160 for faster processing
-int minFrameSkip = 3;  // Increased from 2
-int maxFrameSkip = 5;  // Increased from 4
+int minFrameSkip = 5;  // Increased from 2
+int maxFrameSkip = 10;  // Increased from 4
 int currentFrameSkip = minFrameSkip;  // Dynamic frame skip
 int frameCounter = 0;
 bool skipFrame = false;
@@ -199,18 +199,9 @@ bool isKeyFrame(const Mat& currentFrame) {
         return true;
     }
 
-    // Resize input frame once and reuse
-    Mat resizedFrame;
-    resize(currentFrame, resizedFrame, Size(inpWidth, inpHeight), 0, 0, INTER_NEAREST);  // Using INTER_NEAREST for speed
-
-    // Convert to grayscale after resize (faster than resizing grayscale)
+    // Convert to grayscale
     Mat currentGray;
-    cvtColor(resizedFrame, currentGray, COLOR_BGR2GRAY);
-    
-    // Resize previous frame if needed
-    if (prevGray.size() != Size(inpWidth, inpHeight)) {
-        resize(prevGray, prevGray, Size(inpWidth, inpHeight), 0, 0, INTER_NEAREST);
-    }
+    cvtColor(currentFrame, currentGray, COLOR_BGR2GRAY);
     
     // Calculate motion
     Mat diff;
@@ -228,15 +219,19 @@ bool isKeyFrame(const Mat& currentFrame) {
         hasMotion = false;
     }
 
-    // Check content change using already resized frame
-    hasContentChange = isContentKeyFrame(resizedFrame);
+    // Check content change using the same frame
+    hasContentChange = isContentKeyFrame(currentFrame);
 
     // Update previous frame
-    resizedFrame.copyTo(prevFrame);
+    currentFrame.copyTo(prevFrame);
     currentGray.copyTo(prevGray);
 
     return hasMotion || hasContentChange;
 }
+
+// Add these parameters back for FPS calculations
+const int FPS_WINDOW_SIZE = 30;  // Number of frames to average FPS over
+vector<double> fps_history;      // Store recent FPS values
 
 int main(int argc, char** argv)
 {
@@ -330,6 +325,22 @@ int main(int argc, char** argv)
         capture_times += capture_time;
         total_frames++;
         
+        // Calculate instant FPS
+        double instant_fps = 1000000.0 / capture_time;
+        
+        // Add to history and maintain window size
+        fps_history.push_back(instant_fps);
+        if (fps_history.size() > FPS_WINDOW_SIZE) {
+            fps_history.erase(fps_history.begin());
+        }
+        
+        // Calculate average FPS over window
+        double avg_fps = 0.0;
+        for (double fps : fps_history) {
+            avg_fps += fps;
+        }
+        avg_fps /= fps_history.size();
+        
         // Calculate total FPS (including skipped frames)
         double total_fps = 1000000.0 / (capture_times / total_frames);
         
@@ -346,6 +357,8 @@ int main(int argc, char** argv)
             
             // Print FPS information to console
             cout << "\rFrame " << frameCounter 
+                 << " - Instant FPS: " << fixed << setprecision(1) << instant_fps
+                 << " - Avg FPS: " << fixed << setprecision(1) << avg_fps
                  << " - Total FPS: " << fixed << setprecision(1) << total_fps
                  << " - Motion: " << (isKey ? "Yes" : "No") << flush;
             
@@ -357,7 +370,7 @@ int main(int argc, char** argv)
 
         // Process frame with YOLO
         // Use pre-allocated buffers
-        cv::resize(frame, frame_buffer, cv::Size(inpWidth, inpHeight));
+        cv::resize(frame, frame_buffer, cv::Size(inpWidth, inpHeight), 0, 0, INTER_NEAREST);  // Faster resize
         cv::cvtColor(frame_buffer, frame_buffer, COLOR_BGR2RGB);
         
         // Create blob using pre-allocated buffer
@@ -375,18 +388,6 @@ int main(int argc, char** argv)
         // Process detections
         postprocess(frame_buffer, frame_buffer, outs);
         
-        // Print detection information in a cleaner format
-        if (!currentDetections.empty()) {
-            cout << "\nDetections:" << endl;
-            for (const auto& det : currentDetections) {
-                cout << "Class: " << det.className 
-                     << " (ID: " << det.classId << ")"
-                     << " - Confidence: " << fixed << setprecision(2) << det.confidence
-                     << " - Box: [" << det.bbox.x << ", " << det.bbox.y 
-                     << ", " << det.bbox.width << ", " << det.bbox.height << "]" << endl;
-            }
-        }
-        
         // End timing for YOLO processing
         auto process_end = high_resolution_clock::now();
         auto process_time = duration_cast<microseconds>(process_end - process_start).count();
@@ -402,6 +403,8 @@ int main(int argc, char** argv)
         
         // Print FPS information to console
         cout << "\rFrame " << frameCounter 
+             << " - Instant FPS: " << fixed << setprecision(1) << instant_fps
+             << " - Avg FPS: " << fixed << setprecision(1) << avg_fps
              << " - Total FPS: " << fixed << setprecision(1) << total_fps
              << " - Process FPS: " << fixed << setprecision(1) << process_fps
              << " - Effective FPS: " << fixed << setprecision(1) << effective_fps
