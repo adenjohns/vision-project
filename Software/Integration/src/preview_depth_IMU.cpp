@@ -225,6 +225,26 @@ public:
         }
     }
 
+    void playShutdownSound() {
+        if (!initialized) return;
+        
+        // Play a descending tone pattern to indicate shutdown
+        // Start with a higher frequency and gradually lower it
+        double volume = 0.5;
+        for (int i = 0; i < 3; i++) {
+            // Play descending tones on both channels
+            double freq = 800.0 - (i * 200.0);  // 800Hz -> 600Hz -> 400Hz
+            playTone(freq, freq, volume);
+            
+            // Small delay between tones
+            usleep(200000);  // 200ms delay
+        }
+        
+        // Final lower tone
+        playTone(300, 300, volume);
+        usleep(300000);  // 300ms delay
+    }
+
     ~AudioFeedbackI2S() {
         stop();
     }
@@ -632,6 +652,8 @@ int main()
                 if (elapsedSeconds >= SHUTDOWN_TIMEOUT) {
                     std::cout << "\nNo significant motion detected for " << SHUTDOWN_TIMEOUT 
                               << " seconds. Shutting down...\n";
+                    // Play shutdown sound before initiating shutdown
+                    audio.playShutdownSound();
                     std::system("sudo shutdown -h now");
                     running = false;
                     break;
